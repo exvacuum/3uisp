@@ -1,4 +1,4 @@
-# 3uisp
+# Survival Game: The Calm
 The culminating assignment from my ICS3U course.
 
 # ICS3U ISP ACTION PLAN
