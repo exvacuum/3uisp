@@ -3,12 +3,12 @@ The culminating assignment from my ICS3U course.
 
 # ICS3U ISP ACTION PLAN
 
-1. Part 1: Program Outline
+Part 1: Program Outline
 
 The program I will be creating for this culminating assignment will be a survival game, taking place in on a large, procedurally generated map (using perlin noise or some other means). Various types of monsters will approach the player from the edge of the map , each type with varying physical capabilities and attack styles. The player will have to take advantage of their surroundings&#39; natural resources, as  well as their own skill to construct various defensive structures and increase the potency of their own attacks. The game will have a wave-based enemy spawning system, with a build phase in between (with optional time limit). The graphical style of the game will be entirely simple, colored polygons (unless time allows for custom spritework to be possible). The game will end when the player is overcome by the enemy and their HP drops to 0. A simple menu will be enough for the starting screen, with an instructions option available if necessary. Game over menu will display score, kills, time, a message, and the options to restart or quit to menu.
 
-1. Part 2: Requirements
-  1. Objectives:
+ Part 2: Requirements
+   Objectives:
 
 - Player Movement System
   - Direction Detection
