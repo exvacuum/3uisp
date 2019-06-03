@@ -1,6 +1,8 @@
 # Survival Game: The Calm
 The culminating assignment from my ICS3U course.
 
+Trello to see current progress: https://trello.com/b/OildaD2A/ics3u-isp
+
 # ICS3U ISP ACTION PLAN
 
 Part 1: Program Outline
