@@ -2,8 +2,6 @@ package game;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -16,7 +14,7 @@ public class TheCalm {
 	int viewX;
 	int viewY;
 	GraphicsConsole gc = new GraphicsConsole(640, 480,"The Calm.");
-	Viewport viewport = new Viewport(0,0);
+	Viewport viewport = new Viewport(0,0, gc);
 	Player player = new Player(viewport, gc);
 	World world = new World(-(1600-(VIEW_H/2)),-(1600-(VIEW_V/2)), viewport, gc);
 	static ArrayList<Monster> monsters = new ArrayList<Monster>();
@@ -24,8 +22,6 @@ public class TheCalm {
 	TimerTask monsterSpawnTask = new monsterSpawn();
 	Timer monsterNumTimer = new Timer();
 	TimerTask monsterNumTask = new monsterNumber();
-	Iterator<Bullet> bi = player.getBullets().iterator();
-	Iterator<Monster> mi = monsters.iterator();
 	
 	int monsterNum = 1;
 	
@@ -64,7 +60,7 @@ public class TheCalm {
 	
 	void setup(){
 		//Graphics
-		gc.setBackgroundColor(Color.GREEN.darker());
+		gc.setBackgroundColor(Color.BLACK);
 		gc.clear();
 		gc.enableMouse();
 		gc.enableMouseMotion();
@@ -74,8 +70,9 @@ public class TheCalm {
 	}
 	
 	void step(){
+		Iterator<Bullet> bi = player.getBullets().iterator();
+		Iterator<Monster> mi = monsters.iterator();
 
-		Collections.sort(monsters, Comparator.comparing(Monster::getY));
 		mi = monsters.iterator();
 		while(mi.hasNext()){
 			Monster m = mi.next();
@@ -102,7 +99,6 @@ public class TheCalm {
 		while(mi.hasNext()){
 			Monster m = mi.next();
 			bi = player.getBullets().iterator();
-			boolean removeM = false;
 			while(bi.hasNext()){
 				Bullet b = bi.next();
 				if(m.contains(b.getCenterX(),b.getCenterY())){
@@ -110,37 +106,35 @@ public class TheCalm {
 					bi.remove();
 					m.hp--;
 					if(m.hp<=0){
-						removeM = true;
+						m.remove = true;
 					}
 				}
 			}
-			if(removeM) {
+		}
+		getViewport().trackPlayer(player);
+		mi = monsters.iterator();
+		while(mi.hasNext()){
+			Monster m = mi.next();
+			if(m.remove){
 				mi.remove();
 			}
 		}
-		getViewport().trackPlayer(player);
 	}
 	
 	void draw(){
 		gc.clear();
 		world.draw();
 		player.draw();
-		bi = player.getBullets().iterator();
-		while(bi.hasNext()){
-			Bullet b = bi.next();
+		for(Bullet b : player.getBullets()) {
 			b.draw();
 		}
-		mi = monsters.iterator();
-		while(mi.hasNext()){
-			Monster m = mi.next();
-			m.draw();
+		for(Monster m : monsters) {
+			m.draw();		
 		}
 	}
 	
 	void drawGUI(){
-		mi = monsters.iterator();
-		while(mi.hasNext()){
-			Monster m = mi.next();
+		for(Monster m : monsters){
 			m.drawGUI();
 		}
 		player.drawGUI();

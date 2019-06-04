@@ -21,6 +21,7 @@ class Monster extends Rectangle{
 	Color color;
 	Color dColor;
 	Viewport viewport;
+	boolean remove = false;
 	
 	class HitControl extends TimerTask{
 		public void run(){
