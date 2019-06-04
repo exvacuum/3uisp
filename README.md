@@ -92,3 +92,9 @@ The program I will be creating for this culminating assignment will be a surviva
 At this point, the project will be copied.
 
  12. Remaining time will be used to create custom sprites for the game. If these are not    completed by the project deadline, I will submit the polygon-based copy, and will continue to  work on the sprites, releasing the final work personally at a later date.
+
+
+CREDITS
+--------
+Perlin Noise (Noise.java)
+Copyright Ken Perlin, 2001
