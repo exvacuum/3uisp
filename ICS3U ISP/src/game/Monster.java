@@ -20,6 +20,7 @@ class Monster extends Rectangle{
 	double dxmag, dymag;
 	Color color;
 	Color dColor;
+	Viewport viewport;
 	
 	class HitControl extends TimerTask{
 		public void run(){
@@ -27,14 +28,15 @@ class Monster extends Rectangle{
 		}
 	}
 	
-	Monster(int x, int y, Player player, GraphicsConsole gc, int type){
+	Monster(int x, int y, Player player, Viewport viewport, GraphicsConsole gc, int type){
 		this.x = x;
 		this.y = y;
 		this.player = player;
 		this.gc = gc;
+		this.viewport = viewport;
 		width = 32;
 		height = 32;
-		target = new Point(player.x,player.y);
+		target = new Point((int)player.x, (int)player.y);
 		dxmag = target.x - x;
 	    dymag = target.y - y;
 	    dir = Math.atan2(dymag, dxmag);
@@ -58,21 +60,21 @@ class Monster extends Rectangle{
 	
 	void draw(){
 		gc.setColor(color);
-		gc.fillRect((int)x, (int)y, width, height);
+		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
 	}
 	
 	void drawGUI(){
 		if(hp!=mhp){
 			gc.setColor(Color.RED);
-			gc.fillRect((int)x, (int)y-15, width, 10);
+			gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-15-viewport.getyOffset()), width, 10);
 			gc.setColor(Color.GREEN);
-			gc.fillRect((int)x, (int)y-15, (int)(width*(hp/mhp)), 10);
+			gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-15-viewport.getyOffset()), (int)(width*(hp/mhp)), 10);
 		}
 	}
 	
 	void seek(){
 		if(Math.random()<=.10){
-			target = new Point(player.x,player.y);
+			target = new Point((int)player.x, (int)player.y);
 			dxmag = target.x - x;
 		    dymag = target.y - y;
 		    dir = Math.atan2(dymag, dxmag);

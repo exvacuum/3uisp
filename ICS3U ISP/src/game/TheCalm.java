@@ -11,9 +11,14 @@ import java.util.TimerTask;
 import hsa2x.GraphicsConsole;
 
 public class TheCalm {
-	
-	GraphicsConsole gc = new GraphicsConsole(640,480,"The Calm.");
-	Player player = new Player(gc);
+	static final int VIEW_H = 640;
+	static final int VIEW_V = 480;
+	int viewX;
+	int viewY;
+	GraphicsConsole gc = new GraphicsConsole(640, 480,"The Calm.");
+	Viewport viewport = new Viewport(0,0);
+	Player player = new Player(viewport, gc);
+	World world = new World(-(1600-(VIEW_H/2)),-(1600-(VIEW_V/2)), viewport, gc);
 	static ArrayList<Monster> monsters = new ArrayList<Monster>();
 	Timer monsterSpawnTimer = new Timer();
 	TimerTask monsterSpawnTask = new monsterSpawn();
@@ -29,7 +34,7 @@ public class TheCalm {
 			for(int i = 0; i < monsterNum; i++) {
 				int x  = (int)((Math.random()*640)+1);
 				int y  = (int)((Math.random()*480)+1);
-				Monster m = new Monster(x, y, player, gc, (int)(Math.random()*2));
+				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
 				monsters.add(m);
 			}
 		}
@@ -53,6 +58,7 @@ public class TheCalm {
 				draw();
 				drawGUI();
 			}
+			gc.sleep(10);
 		}
 	}
 	
@@ -76,7 +82,7 @@ public class TheCalm {
 			m.seek();
 			m.move();
 		}
-
+		
 		bi = player.getBullets().iterator();
 		while(bi.hasNext()){
 			Bullet b = bi.next();
@@ -87,7 +93,7 @@ public class TheCalm {
 		bi = player.getBullets().iterator();
 		while(bi.hasNext()){
 			Bullet b = bi.next();
-			if(!gc.contains((int)b.x,(int)b.y)){
+			if(b.deleteMe){
 				bi.remove();
 			}
 			
@@ -112,10 +118,12 @@ public class TheCalm {
 				mi.remove();
 			}
 		}
+		getViewport().trackPlayer(player);
 	}
 	
 	void draw(){
 		gc.clear();
+		world.draw();
 		player.draw();
 		bi = player.getBullets().iterator();
 		while(bi.hasNext()){
@@ -128,12 +136,17 @@ public class TheCalm {
 			m.draw();
 		}
 	}
+	
 	void drawGUI(){
 		mi = monsters.iterator();
 		while(mi.hasNext()){
 			Monster m = mi.next();
 			m.drawGUI();
 		}
-		gc.sleep(10);
+		player.drawGUI();
+	}
+	
+	Viewport getViewport(){
+		return viewport;
 	}
 }
