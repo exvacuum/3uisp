@@ -10,7 +10,8 @@ public class World {
 	static final int GRID_SIZE = 32;
 	static final int GRID_NUM = 100;
 	
-	static final int TILE_GRASSY = 0;
+	static final int TILE_GRASSY = -1;
+	static final int TILE_DIRTY = 0;
 	static final int TILE_MOSSY = 1;
 	
 	static final int DECO_NONE = 0;
@@ -34,33 +35,30 @@ public class World {
 	}
 	
 	void generate(){
-		float scl = 0.02f;
+		float scl = 0.09f;
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
-				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*4;
+				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*6;
+				System.out.printf("%2d",(int)Math.round(tileVals[row][col]));
 				tileBounds[row][col] = new Rectangle(0,0,0,0);
 				tileBounds[row][col].setBounds(x+(GRID_SIZE*col),y+(GRID_SIZE*row),GRID_SIZE,GRID_SIZE);
 			}
+			System.out.println();
 		}
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
-				if((row!=50&&col!=50)&&(row!=49&&col!=49))
-				switch((int)Math.round(Math.abs(tileVals[row][col]))){
-				case TILE_GRASSY:
-					if(Math.random()>0.98){
-						tileDecor[row][col] = DECO_TREE;
+				if((row!=50&&col!=50)&&(row!=49&&col!=49)){
+					float val = Math.round(tileVals[row][col]);
+					if(val>=2){
+						if(Math.random()>0.75){
+							tileDecor[row][col] = DECO_STONE;
+						}
 					}
-					break;
-				case TILE_MOSSY:
-					if(Math.random()>0.85){
-						tileDecor[row][col] = DECO_STONE;
+					if(val<=-2){
+						if(Math.random()>0.8){
+							tileDecor[row][col] = DECO_TREE;
+						}
 					}
-					break;
-				default:
-					if(Math.random()>0.95){
-						tileDecor[row][col] = DECO_TREE;
-					}
-					break;
 				}
 			}
 		}
@@ -69,15 +67,15 @@ public class World {
 	void draw(){
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){	
-				switch((int)Math.round(Math.abs(tileVals[row][col]))){
+				switch((int)Math.signum(Math.round(tileVals[row][col]))){
 				case TILE_GRASSY:
 					gc.setColor(Color.GREEN);
 					break;
+				case TILE_DIRTY:
+					gc.setColor(Color.ORANGE.darker());
+					break;
 				case TILE_MOSSY:
 					gc.setColor(Color.GREEN.darker());
-					break;
-				default:
-					gc.setColor(Color.GREEN);
 					break;
 				}
 				gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);

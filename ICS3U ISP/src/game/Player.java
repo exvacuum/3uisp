@@ -14,7 +14,7 @@ class Player extends Rectangle{
 	int gx, gy;
 	double hp = 100;
 	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100;
-	int dx = 0, dy = 0, fireRateDelay = 1, vMulti = 1;		
+	int dx = 0, dy = 0, fireRateDelay = 100, vMulti = 1;		
 	GraphicsConsole gc;
 	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	ArrayList<Bullet> trashBullets = new ArrayList<Bullet>();
@@ -71,7 +71,7 @@ class Player extends Rectangle{
 				}
 			}
 			if((mouseButtonDown(0)&&canFire)){
-				Bullet b = new Bullet((int)x+16,(int)y+16, this, viewport, gc);
+				Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
 				bullets.add(b);
 				canFire = false;
 				Timer fireRateTimer = new Timer();
@@ -84,11 +84,13 @@ class Player extends Rectangle{
 		//Direction to Move
 		if(dx!=0){
 				//Accelerate
-				if(Math.abs(vx)<mv*vMulti){
-					vx+=a*dx*vMulti;
-				}else{
-					vx = mv*dx*vMulti;
-				}
+			if(dx == -dvx){
+				vx+=(dx*a+dx*a)*vMulti;
+			}else if(Math.abs(vx)<mv*vMulti){
+				vx+=a*dx*vMulti;
+			}else{
+				vx = mv*dx*vMulti;
+			}
 		}else{
 			//Decelerate
 			if(Math.abs(vx)>=a*3){
@@ -101,12 +103,14 @@ class Player extends Rectangle{
 		dvy = getDirVY();
 		//Direction to Move
 		if(dy!=0){
-				//Accelerate
-				if(Math.abs(vy)<mv*vMulti){
-					vy+=a*dy*vMulti;
-				}else{
-					vy = mv*dy*vMulti;
-				}
+			//Accelerate
+			if(dy == -dvy){
+				vy+=(dy*a+dy*a)*vMulti;
+			}else if(Math.abs(vy)<mv*vMulti){
+				vy+=a*dy*vMulti;
+			}else{
+				vy = mv*dy*vMulti;
+			}
 		}else{
 			//Decelerate
 			if(Math.abs(vy)>=a*3){
