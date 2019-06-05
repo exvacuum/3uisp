@@ -16,7 +16,7 @@ public final class Noise {
    /** 
    Initialization seed used to start the random number generator.
    */
-   public static int seed = (int)(Math.random()*1000);
+   public static int seed = (int)(Math.random()*1000000);
 
    private static final int P = 8;
    private static final int B = 1 << P;

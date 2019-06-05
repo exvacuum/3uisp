@@ -21,7 +21,7 @@ public class World {
 	int y;
 	GraphicsConsole gc;
 	float[][] tileVals = new float[GRID_NUM][GRID_NUM];
-	float[][] tileDecor = new float[GRID_NUM][GRID_NUM];
+	int[][] tileDecor = new int[GRID_NUM][GRID_NUM];
 	Rectangle[][] tileBounds = new Rectangle[GRID_NUM][GRID_NUM];
 	Viewport viewport;
 	
@@ -34,25 +34,32 @@ public class World {
 	}
 	
 	void generate(){
-		float scl = 0.1f;
+		float scl = 0.02f;
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
-				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*2;
+				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*4;
 				tileBounds[row][col] = new Rectangle(0,0,0,0);
 				tileBounds[row][col].setBounds(x+(GRID_SIZE*col),y+(GRID_SIZE*row),GRID_SIZE,GRID_SIZE);
 			}
 		}
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
+				if((row!=50&&col!=50)&&(row!=49&&col!=49))
 				switch((int)Math.round(Math.abs(tileVals[row][col]))){
 				case TILE_GRASSY:
-					
+					if(Math.random()>0.98){
+						tileDecor[row][col] = DECO_TREE;
+					}
 					break;
 				case TILE_MOSSY:
-					gc.setColor(Color.green.darker());
+					if(Math.random()>0.85){
+						tileDecor[row][col] = DECO_STONE;
+					}
 					break;
 				default:
-					gc.setColor(Color.GREEN);
+					if(Math.random()>0.95){
+						tileDecor[row][col] = DECO_TREE;
+					}
 					break;
 				}
 			}
@@ -67,13 +74,28 @@ public class World {
 					gc.setColor(Color.GREEN);
 					break;
 				case TILE_MOSSY:
-					gc.setColor(Color.green.darker());
+					gc.setColor(Color.GREEN.darker());
 					break;
 				default:
 					gc.setColor(Color.GREEN);
 					break;
 				}
 				gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+				boolean drawThis = true;
+				switch(tileDecor[row][col]){
+				case DECO_TREE:
+					gc.setColor(Color.GREEN.darker().darker().darker());
+					break;
+				case DECO_STONE:
+					gc.setColor(Color.DARK_GRAY.darker());
+					break;
+				default:
+					drawThis = false;
+					break;
+				}
+				if(drawThis){
+					gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+				}
 			}
 		}
 	}

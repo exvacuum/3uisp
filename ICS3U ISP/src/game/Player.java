@@ -11,14 +11,17 @@ import hsa2x.GraphicsConsole;
 @SuppressWarnings("serial")
 class Player extends Rectangle{
 	double x,y;
+	int gx, gy;
 	double hp = 100;
 	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100;
-	int dx = 0, dy = 0, fireRateDelay = 30, vMulti = 1;		
+	int dx = 0, dy = 0, fireRateDelay = 1, vMulti = 1;		
 	GraphicsConsole gc;
 	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	ArrayList<Bullet> trashBullets = new ArrayList<Bullet>();
 	boolean canFire = true;
 	Viewport viewport;
+	World world;
+	int left_tile, right_tile, top_tile, bottom_tile;
 	
 	private class FireRateControl extends TimerTask 
 	{ 
@@ -28,7 +31,8 @@ class Player extends Rectangle{
 	    } 
 	} 
 			
-	Player(Viewport viewport, GraphicsConsole gc){
+	Player(World world, Viewport viewport, GraphicsConsole gc){
+		this.world = world;
 		this.gc = gc;
 		this.viewport = viewport;
 		x = gc.getDrawWidth()/2-16;
@@ -110,9 +114,71 @@ class Player extends Rectangle{
 			}else{
 				vy = 0;
 			}
+		}	
+		
+		double oldx = x;
+		double oldy = y;
+		x += vx;
+		
+		left_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		right_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		top_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottom_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		
+		if(left_tile < 0) left_tile = 0;
+		if(right_tile > World.GRID_NUM-1) right_tile = World.GRID_NUM-1;
+		if(top_tile < 0) top_tile = 0;
+		if(bottom_tile > World.GRID_NUM-1) bottom_tile = World.GRID_NUM-1;
+		
+		for(int i=left_tile; i<=right_tile; i++)
+		{
+			for(int j=top_tile; j<=bottom_tile; j++)
+			{
+				if(world.tileDecor[j][i]!=World.DECO_NONE){
+					x = oldx;
+					y = oldy;
+				}
+			}
+		}	
+		
+		oldx = x;
+		oldy = y;
+		y += vy;
+		
+		left_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		right_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		top_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottom_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		
+		if(left_tile < 0) left_tile = 0;
+		if(right_tile > World.GRID_NUM-1) right_tile = World.GRID_NUM-1;
+		if(top_tile < 0) top_tile = 0;
+		if(bottom_tile > World.GRID_NUM-1) bottom_tile = World.GRID_NUM-1;
+		
+		for(int i=left_tile; i<=right_tile; i++)
+		{
+			for(int j=top_tile; j<=bottom_tile; j++)
+			{
+				if(world.tileDecor[j][i]!=World.DECO_NONE)
+				{
+					x = oldx;
+					y = oldy;
+				}
+			}
+		}	
+		
+		if(x<-1600+(TheCalm.VIEW_H/2)){
+			x = -1600+(TheCalm.VIEW_H/2);
 		}
-		x+=vx;
-		y+=vy;
+		if((x+width)>1600+(TheCalm.VIEW_H/2)){
+			x = 1600-width+(TheCalm.VIEW_H/2);
+		}
+		if(y<-1600+(TheCalm.VIEW_V/2)){
+			y = -1600+(TheCalm.VIEW_V/2);
+		}
+		if((y+height)>1600+(TheCalm.VIEW_V/2)){
+			y = 1600-height+(TheCalm.VIEW_V/2);
+		}
 	}
 	
 	void draw(){

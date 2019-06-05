@@ -51,7 +51,7 @@ class Monster extends Rectangle{
 	    	color = dColor;
 	    	break;
 	    case GOBLIN:
-	    	hp = 10;
+	    	hp = 1;
 	    	mhp = hp;
 	    	dColor = new Color(0,100,0);
 	    	color = dColor;

@@ -13,10 +13,10 @@ public class TheCalm {
 	static final int VIEW_V = 480;
 	int viewX;
 	int viewY;
-	GraphicsConsole gc = new GraphicsConsole(640, 480,"The Calm.");
+	GraphicsConsole gc = new GraphicsConsole(VIEW_H, VIEW_V,"The Calm.");
 	Viewport viewport = new Viewport(0,0, gc);
-	Player player = new Player(viewport, gc);
 	World world = new World(-(1600-(VIEW_H/2)),-(1600-(VIEW_V/2)), viewport, gc);
+	Player player = new Player(world, viewport, gc);
 	static ArrayList<Monster> monsters = new ArrayList<Monster>();
 	Timer monsterSpawnTimer = new Timer();
 	TimerTask monsterSpawnTask = new monsterSpawn();
@@ -28,10 +28,12 @@ public class TheCalm {
 	private class monsterSpawn  extends TimerTask{
 		public void run(){
 			for(int i = 0; i < monsterNum; i++) {
-				int x  = (int)((Math.random()*640)+1);
-				int y  = (int)((Math.random()*480)+1);
-				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
-				monsters.add(m);
+				if(monsters.size()<100){
+					int x  = (int)((Math.random()*640)+1);
+					int y  = (int)((Math.random()*480)+1);
+					Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
+					monsters.add(m);
+				}
 			}
 		}
 	}
@@ -51,6 +53,7 @@ public class TheCalm {
 		while(true){
 			step();
 			synchronized(gc){
+				gc.clear();
 				draw();
 				drawGUI();
 			}
@@ -70,36 +73,27 @@ public class TheCalm {
 	}
 	
 	void step(){
-		Iterator<Bullet> bi = player.getBullets().iterator();
-		Iterator<Monster> mi = monsters.iterator();
-
-		mi = monsters.iterator();
-		while(mi.hasNext()){
+		for(Iterator<Monster> mi = monsters.iterator(); mi.hasNext();){
 			Monster m = mi.next();
 			m.seek();
 			m.move();
 		}
 		
-		bi = player.getBullets().iterator();
-		while(bi.hasNext()){
-			Bullet b = bi.next();
+		for(Bullet b : player.getBullets()){
 			b.move();
 		}
 		
 		player.input();
-		bi = player.getBullets().iterator();
-		while(bi.hasNext()){
+		
+		for(Iterator<Bullet> bi = player.getBullets().iterator();bi.hasNext();){
 			Bullet b = bi.next();
 			if(b.deleteMe){
 				bi.remove();
 			}
-			
 		}
-		mi = monsters.iterator();
-		while(mi.hasNext()){
-			Monster m = mi.next();
-			bi = player.getBullets().iterator();
-			while(bi.hasNext()){
+		
+		for(Monster m : monsters){
+			for(Iterator<Bullet> bi = player.getBullets().iterator();bi.hasNext();){
 				Bullet b = bi.next();
 				if(m.contains(b.getCenterX(),b.getCenterY())){
 					m.hurt(b);
@@ -111,18 +105,18 @@ public class TheCalm {
 				}
 			}
 		}
-		getViewport().trackPlayer(player);
-		mi = monsters.iterator();
-		while(mi.hasNext()){
+		
+		for(Iterator<Monster> mi = monsters.iterator(); mi.hasNext();){
 			Monster m = mi.next();
 			if(m.remove){
 				mi.remove();
 			}
 		}
+
+		getViewport().trackPlayer(player);
 	}
 	
 	void draw(){
-		gc.clear();
 		world.draw();
 		player.draw();
 		for(Bullet b : player.getBullets()) {
