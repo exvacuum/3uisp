@@ -17,45 +17,45 @@ The program I will be creating for this culminating assignment will be a surviva
    Objectives:
 
 - Player Movement System
-  - Direction Detection
-  - Acceleration / Deceleration
-  - Max Speed
-  - Dash &amp; Stamina
+  - Direction Detection (1 for right, -1 for left, 0 for none, etc.)
+  - Acceleration / Deceleration (vx += a, x+=vx, etc.)
+  - Max Speed (if(Math.abs(vx)<vmax))
+  - Dash &amp; Stamina (Detect if shift held, then if player is moving)
 - Player Weapons System
   - Ranged Weapon
     - Projectile
-      - Angle
-      - Spread
-    - Rate of Fire
-    - Player Knockback
-    - Weaker Enemy Knockback
+      - Angle (Math.atan2() for angles)
+      - Spread (+- a certain number (probably less than 10 is fine) to each component of the angle)
+    - Rate of Fire (java.util.Timer)
+    - Player Knockback (Just move x & y in opposite direction to bullet)
+    - Weaker Enemy Knockback (Move enemy in direction of bullet)
   - Melee Weapon
-    - Area of Effect
-    - Enemy Knockback
-    - Delay
-    - Exhaustion
-  - Ability to Toggle
-  - Disable on Build Phase
+    - Area of Effect (Rectangle Collisions)
+    - Enemy Knockback (get magnitude of a lerp between the player and enemy and apply force in that direction)
+    - Delay (Timer)
+    - Exhaustion (Stamina Affects Swing Speed)
+  - Ability to Toggle (Key, or Right click can automatically melee, I'm not sure what I want here yet)
+  - Disable on Build Phase (Simple boolean check, toggle boolean between phases)
 - Player Health Control
-  - Healing
-  - Taking Damage
-  - Invincibility Frames on Hit
-  - Health Bar
-  - Death/Game Over
+  - Healing (hp += n)
+  - Taking Damage (hp -= n)
+  - Invincibility Frames on Hit (boolean + Timer)
+  - Health Bar (rectangle with width w + rectangle with width (int)((hp/maxhp)*w))
+  - Death/Game Over (if(hp<=0))
 - Enemy AI
-  - Wave System for Spawning
-    - Enemy Number
-    - Enemy Variety
+  - Wave System for Spawning (Timer + Button to Skip Countdown)
+    - Enemy Number (Increment every wave)
+    - Enemy Variety (Use an if statement to control types of enemies allowed at that wave, Math.random() if statements to decide which type they will be)
   - Enemy Types
-    - Simple Player Chasing Enemies
-    - Enemies with Ranged Attacks which Chase Player Until in Range
+    - Simple Player Chasing Enemies (move to player.x, player.y)
+    - Enemies with Ranged Attacks which Chase Player Until in Range (while distance to player is greater than n, move to player.x, player.y, attack from there, if player then moves to point farther than n*1.25, resume chase.)
   - Enemy Pathfinding
-    - Move Around Solids
+    - Move Around Solids (I've heard A* algorithm is good, I'll need to learn it.)
   - Aesthetic
-    - Shade Variation Within Types
+    - Shade Variation Within Types (HSVtoRGB where hue & saturation will remain the same but value will vary)
   - Health System
-    - Death
-    - Health Bars
+    - Death (if hp<=0, remove from arraylist)
+    - Health Bars (see player health system, but these will hover above enemies after they have been hit at least once.)
 - Game Control
   - Main Menu
     - Start Game
@@ -75,9 +75,8 @@ The program I will be creating for this culminating assignment will be a surviva
     - Generation
       - Grid / Constant Based Tiling
       - Method
-        - Option A (Optional): Perlin Noise Generation
-        - Option B: Create &quot;Tiler Machines&quot; that Will Move Around Pseudo-Randomly Placing Blocks of a Certain Type, Resolve Oddities (e.g. A Ring of sand Could Contain a Pond), Sprinkle Environmental Objects Around Afterwards
-      - Size: 1000 32x32 Places in Either Direction
+        - Option A (Optional): Perlin Noise Generation with denser pockets of solids at higher absolute values
+      - Size: 100 32x32 Places in Either Direction
 
 1. Part 3: Optimistic Deadlines
 
