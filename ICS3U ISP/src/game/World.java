@@ -47,7 +47,7 @@ public class World {
 		}
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
-				if((row!=50&&col!=50)&&(row!=49&&col!=49)){
+				if(!((row==50||row==49)&&(col==50||col==49))){
 					float val = Math.round(tileVals[row][col]);
 					if(val>=2){
 						if(Math.random()>0.75){

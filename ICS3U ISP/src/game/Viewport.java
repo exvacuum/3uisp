@@ -1,56 +1,35 @@
 package game;
 
-import java.awt.Rectangle;
-
 import hsa2x.GraphicsConsole;
 
 public class Viewport {
 	
+	//Offset for drawing everything
 	private float xOffset, yOffset;
-	private Rectangle screenBounds = new Rectangle(0,0,0,0);
+	
+	//Graphics Console
 	GraphicsConsole gc;
-	private Rectangle screenSize;
 	
 	Viewport(float xOffset, float yOffset, GraphicsConsole gc){
+		//Starting Offset(Usually should be 0,0) 
 		this.xOffset = xOffset;
 		this.yOffset = yOffset;
 		this.gc = gc;
-		screenSize = gc.getBounds();
 	}
 
+	//Center View on player
 	public void trackPlayer(Player player){
 		xOffset = (int)(player.x-640/2);
 		yOffset = (int)(player.y-480/2);
 	}
 	
-	public void move(float xAmt, float yAmt){
-		xOffset += xAmt;
-		yOffset += yAmt;
-		screenBounds = new Rectangle((int)(screenSize.x-xOffset), (int)(screenSize.y-yOffset), screenSize.width, screenSize.height);
-	}
-	
+	//Getters for offset
 	public float getxOffset() {
 		return xOffset;
-	}
-
-	public void setxOffset(float xOffset) {
-		this.xOffset = xOffset;
 	}
 
 	public float getyOffset() {
 		return yOffset;
 	}
 
-	public void setyOffset(float yOffset) {
-		this.yOffset = yOffset;
-	}
-
-	public Rectangle getScreenBounds() {
-		return screenBounds;
-	}
-
-	public void setScreenBounds(Rectangle screenBounds) {
-		this.screenBounds = screenBounds;
-	}
-	
 }

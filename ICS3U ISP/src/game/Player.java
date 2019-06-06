@@ -10,19 +10,38 @@ import hsa2x.GraphicsConsole;
 
 @SuppressWarnings("serial")
 class Player extends Rectangle{
-	double x,y;
-	int gx, gy;
-	double hp = 100;
-	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100;
-	int dx = 0, dy = 0, fireRateDelay = 100, vMulti = 1;		
-	GraphicsConsole gc;
-	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-	ArrayList<Bullet> trashBullets = new ArrayList<Bullet>();
-	boolean canFire = true;
-	Viewport viewport;
-	World world;
-	int left_tile, right_tile, top_tile, bottom_tile;
 	
+	//Position
+	double x,y;
+	
+	//Health
+	double hp = 100;
+	
+	//Velocity, acceleration, stamina
+	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100;
+	
+	//Direction, fire rate, speed multiplier
+	int dx = 0, dy = 0, fireRateDelay = 100, vMulti = 1;		
+	
+	//Graphics Console
+	GraphicsConsole gc;
+	
+	//Bullets List
+	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
+	
+	//Boolean for regulating rate of fire
+	boolean canFire = true;
+	
+	//Viewport
+	Viewport viewport;
+	
+	//World
+	World world;
+	
+	//Tiles surrounding player,
+	int leftTile, rightTile, topTile, bottomTile;
+	
+	//Fire Rate Control
 	private class FireRateControl extends TimerTask 
 	{ 
 	    public void run() 
@@ -35,41 +54,73 @@ class Player extends Rectangle{
 		this.world = world;
 		this.gc = gc;
 		this.viewport = viewport;
+		
+		//Put player in the center of the screen
 		x = gc.getDrawWidth()/2-16;
 		y = gc.getDrawHeight()/2-16;
+		
+		//Size
 		width = 32;
 		height = 32;
 	}
 	
 	void input(){
+		
+		//Move
+		
+		//By default directions are 0 
 		dx=dy=0;
 		if(gc.isFocused()){
+			
+			//UP
 			if(keyDown('W')){
 				dy--;
 			}
+			
+			//DOWN
 			if(keyDown('S')){
 				dy++;
 			}
+			
+			//LEFT
 			if(keyDown('A')){
 				dx--;
 			}
+			
+			//RIGHT
 			if(keyDown('D')){
 				dx++;
 			}
+			
+			//Sprint if shift is pressed and moving
 			if(keyDown(GraphicsConsole.VK_SHIFT)&&stam>0&&(dx!=0||dy!=0)){
+				
+				//Double acceleration and maximum velocity
 				vMulti = 2;
+				
+				//Drain Stamina
 				stam -= 1;
 			}else{
+				
+				//Reset speed multiplier
 				vMulti = 1;
+				
+				//Catch stamina when it dips below 0
 				if(stam<0){
 					stam = 0;
 				}
+				
+				//Regenerate stamina
 				if(stam<mstam){
 					stam+=0.1;
 				}else{
+					
+					//catch stamina when it reaches its max
 					stam = mstam;
 				}
 			}
+			
+			//Fire Bullets from the center of the player, accounting for delay caused by fire rate
 			if((mouseButtonDown(0)&&canFire)){
 				Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
 				bullets.add(b);
@@ -79,12 +130,19 @@ class Player extends Rectangle{
 				fireRateTimer.schedule(fireRateTask, fireRateDelay);
 			}
 		}
-		//Horizontal
+		
+		//Horizontal velocity direction
 		dvx = getDirVX();
+		
 		//Direction to Move
 		if(dx!=0){
-				//Accelerate
+			
+			//Accelerate
+			
+			//If moving the opposite direction of the current velocity
 			if(dx == -dvx){
+				
+				//"Wiggle"
 				vx+=(dx*a+dx*a)*vMulti;
 			}else if(Math.abs(vx)<mv*vMulti){
 				vx+=a*dx*vMulti;
@@ -124,19 +182,19 @@ class Player extends Rectangle{
 		double oldy = y;
 		x += vx;
 		
-		left_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		right_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		top_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottom_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		leftTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		rightTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		topTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottomTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
 		
-		if(left_tile < 0) left_tile = 0;
-		if(right_tile > World.GRID_NUM-1) right_tile = World.GRID_NUM-1;
-		if(top_tile < 0) top_tile = 0;
-		if(bottom_tile > World.GRID_NUM-1) bottom_tile = World.GRID_NUM-1;
+		if(leftTile < 0) leftTile = 0;
+		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
+		if(topTile < 0) topTile = 0;
+		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
 		
-		for(int i=left_tile; i<=right_tile; i++)
+		for(int i=leftTile; i<=rightTile; i++)
 		{
-			for(int j=top_tile; j<=bottom_tile; j++)
+			for(int j=topTile; j<=bottomTile; j++)
 			{
 				if(world.tileDecor[j][i]!=World.DECO_NONE){
 					x = oldx;
@@ -149,19 +207,19 @@ class Player extends Rectangle{
 		oldy = y;
 		y += vy;
 		
-		left_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		right_tile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		top_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottom_tile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		leftTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		rightTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		topTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottomTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
 		
-		if(left_tile < 0) left_tile = 0;
-		if(right_tile > World.GRID_NUM-1) right_tile = World.GRID_NUM-1;
-		if(top_tile < 0) top_tile = 0;
-		if(bottom_tile > World.GRID_NUM-1) bottom_tile = World.GRID_NUM-1;
+		if(leftTile < 0) leftTile = 0;
+		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
+		if(topTile < 0) topTile = 0;
+		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
 		
-		for(int i=left_tile; i<=right_tile; i++)
+		for(int i=leftTile; i<=rightTile; i++)
 		{
-			for(int j=top_tile; j<=bottom_tile; j++)
+			for(int j=topTile; j<=bottomTile; j++)
 			{
 				if(world.tileDecor[j][i]!=World.DECO_NONE)
 				{

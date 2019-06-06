@@ -11,18 +11,36 @@ import hsa2x.GraphicsConsole;
 @SuppressWarnings("serial")
 class Monster extends Rectangle{
 	
+	//Monster Types
 	static final int GHOUL = 0;
 	static final int GOBLIN = 1;
+	
+	//Point to move towards
 	Point target;
+	
+	//Player
 	Player player;
+	
+	//Window
 	GraphicsConsole gc;
+	
+	//Position, direction, and health
 	double x, y, dx, dy, dir, hp, mhp;
+	
+	//Direction + magnitude (Component vectors I guess)
 	double dxmag, dymag;
+	
+	//Color, Default Color
 	Color color;
 	Color dColor;
+	
+	//Viewport
 	Viewport viewport;
+	
+	//Boolean to tell whether to delete this
 	boolean remove = false;
 	
+	//Set color back to normal after hit frames
 	class HitControl extends TimerTask{
 		public void run(){
 			color = dColor;
@@ -35,14 +53,26 @@ class Monster extends Rectangle{
 		this.player = player;
 		this.gc = gc;
 		this.viewport = viewport;
+	
+		//Size
 		width = 32;
 		height = 32;
+		
+		//Locate target
 		target = new Point((int)player.x, (int)player.y);
+		
+		//Component vectors of direction to target
 		dxmag = target.x - x;
 	    dymag = target.y - y;
+
+	    //Purely the angle to target
 	    dir = Math.atan2(dymag, dxmag);
+	    
+	    //Components of the direction
 	    dx = Math.cos(dir);
 	    dy = Math.sin(dir);
+	    
+	    //Specialize the monster
 	    switch(type){
 	    case GHOUL:
 	    	hp = 2;
@@ -60,11 +90,13 @@ class Monster extends Rectangle{
 	}
 	
 	void draw(){
+		//Draw the Monster
 		gc.setColor(color);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
 	}
 	
 	void drawGUI(){
+		//If the monster has been hurt, draw a healthbar
 		if(hp!=mhp){
 			gc.setColor(Color.RED);
 			gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-15-viewport.getyOffset()), width, 10);
@@ -74,6 +106,7 @@ class Monster extends Rectangle{
 	}
 	
 	void seek(){
+		//1/10 chance the monster will re-target player (Saves memory)
 		if(Math.random()<=.10){
 			target = new Point((int)player.x, (int)player.y);
 			dxmag = target.x - x;
@@ -84,36 +117,14 @@ class Monster extends Rectangle{
 		}
 	}
 	
+	//Move
 	void move(){
-		//collisions();
 		x+=dx;
 		y+=dy;
 		setBounds((int)x,(int)y,width,height);
 	}
 	
-	void collisions(){
-		for(Monster m : TheCalm.monsters){
-			if(m.intersects(this)&&m!=this){
-				//right Side 
-				if(x-dx*2 <= m.x){
-					x -= dx+1;
-				}
-				//left Side
-				if(x-dx*2 >= m.getMaxX()){
-					x -= dx+1;
-				}
-				//Bottom Side
-				if(y-dy*2 <= m.y){
-					y-=dy+1;
-				}
-				//Top Side
-				if(y-dy*2 >= m.getMaxY()){
-					y-=dy+1;
-				}
-			}
-		}
-	}
-	
+	//Respond to being hit (knockback, flash red)
 	void hurt(Bullet b){
 		hp--;
 		color = new Color(100,0,0);
