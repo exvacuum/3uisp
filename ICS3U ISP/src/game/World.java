@@ -35,15 +35,15 @@ public class World {
 	}
 	
 	void generate(){
-		float scl = 0.09f;
+		float scl = 0.05f;
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){
-				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*6;
-				System.out.printf("%2d",(int)Math.round(tileVals[row][col]));
+				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*10;
+				//System.out.printf("%2d",(int)Math.round(tileVals[row][col]));
 				tileBounds[row][col] = new Rectangle(0,0,0,0);
 				tileBounds[row][col].setBounds(x+(GRID_SIZE*col),y+(GRID_SIZE*row),GRID_SIZE,GRID_SIZE);
 			}
-			System.out.println();
+			//System.out.println();
 		}
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){

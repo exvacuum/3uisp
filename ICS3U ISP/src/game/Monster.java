@@ -23,11 +23,11 @@ class Monster extends Rectangle{
 	Viewport viewport;
 	boolean remove = false;
 	
-//	class HitControl extends TimerTask{
-//		public void run(){
-//			color = dColor;
-//		}
-//	}
+	class HitControl extends TimerTask{
+		public void run(){
+			color = dColor;
+		}
+	}
 	
 	Monster(int x, int y, Player player, Viewport viewport, GraphicsConsole gc, int type){
 		this.x = x;
@@ -117,9 +117,9 @@ class Monster extends Rectangle{
 	void hurt(Bullet b){
 		hp--;
 		color = new Color(100,0,0);
-//		Timer hitTimer = new Timer();
-//		TimerTask hitTask = new HitControl();
-//		hitTimer.schedule(hitTask, 200);
+		Timer hitTimer = new Timer();
+		TimerTask hitTask = new HitControl();
+		hitTimer.schedule(hitTask, 200);
 		x+=b.dx*3;
 		y+=b.dy*3;
 	}

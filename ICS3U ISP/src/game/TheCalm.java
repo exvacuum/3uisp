@@ -23,19 +23,12 @@ public class TheCalm {
 	TimerTask monsterSpawnTask = new monsterSpawn();
 	Timer monsterNumTimer = new Timer();
 	TimerTask monsterNumTask = new monsterNumber();
-	
+	boolean willSpawnMonsters = false;
 	int monsterNum = 1;
 	
 	private class monsterSpawn  extends TimerTask{
 		public void run(){
-			for(int i = 0; i < monsterNum; i++) {
-				if(monsters.size()<10000){
-					int x  = (int)((Math.random()*640)+1);
-					int y  = (int)((Math.random()*480)+1);
-					Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
-					monsters.add(m);
-				}
-			}
+			willSpawnMonsters = true;
 		}
 	}
 	
@@ -52,6 +45,7 @@ public class TheCalm {
 	TheCalm(){
 		setup();
 		while(true){
+			if(willSpawnMonsters) spawnMonsters();
 			monsters.removeAll(x_monsters);
 			player.getBullets().removeAll(x_bullets);
 			step();
@@ -131,5 +125,17 @@ public class TheCalm {
 	
 	Viewport getViewport(){
 		return viewport;
+	}
+	
+	void spawnMonsters(){
+		for(int i = 0; i < monsterNum; i++) {
+			if(monsters.size()<10000){
+				int x  = (int)((Math.random()*640)+1);
+				int y  = (int)((Math.random()*480)+1);
+				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
+				monsters.add(m);
+			}
+		}
+		willSpawnMonsters = false;
 	}
 }
