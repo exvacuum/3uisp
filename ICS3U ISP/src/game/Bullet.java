@@ -64,7 +64,7 @@ class Bullet extends Rectangle{
 		void draw(){
 			
 			//Draw Bullet, account for offset caused by viewport
-			gc.setColor(new Color(100,100,0));
+			gc.setColor(Color.YELLOW);
 			gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
 		}
 		

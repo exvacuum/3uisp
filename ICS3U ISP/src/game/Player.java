@@ -142,112 +142,164 @@ class Player extends Rectangle{
 			//If moving the opposite direction of the current velocity
 			if(dx == -dvx){
 				
-				//"Wiggle"
+				//"Wiggle" Decelerate before re-accelerating when changing directions
 				vx+=(dx*a+dx*a)*vMulti;
+				
+			//If below max speed
 			}else if(Math.abs(vx)<mv*vMulti){
+				
+				//Accelerate
 				vx+=a*dx*vMulti;
 			}else{
+				
+				//Constant velocity
 				vx = mv*dx*vMulti;
 			}
 		}else{
+			
 			//Decelerate
 			if(Math.abs(vx)>=a*3){
 				vx -= ((a)*dvx);
 			}else{
+				
+				//Stop
 				vx = 0;
 			}
 		}
-		//Vertical
+		
+		//Vertical velocity direction
 		dvy = getDirVY();
+		
 		//Direction to Move
 		if(dy!=0){
+			
 			//Accelerate
+			
+			//If moving the opposite direction of the current velocity
 			if(dy == -dvy){
+				
+				//"Wiggle" Decelerate before re-accelerating when changing directions
 				vy+=(dy*a+dy*a)*vMulti;
+				
+			//If below max speed	
 			}else if(Math.abs(vy)<mv*vMulti){
+				
+				//Accelerate
 				vy+=a*dy*vMulti;
 			}else{
+				
+				//Constant velocity
 				vy = mv*dy*vMulti;
 			}
 		}else{
+			
 			//Decelerate
 			if(Math.abs(vy)>=a*3){
 				vy -= ((a)*dvy);
 			}else{
+				
+				//Stop
 				vy = 0;
 			}
 		}	
 		
+		//Player's old position
 		double oldx = x;
 		double oldy = y;
+		
+		//Move Horizontally
 		x += vx;
 		
-		leftTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		rightTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		topTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottomTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		/*Horizontal Collision Checking
+		 * 
+		 *Basically, this retrieves the place each of the player's sides
+		 *left tile and right tile return the columns either side of the player is in
+		 *top tile and bottom tile return the rows on top and below the tile
+		 */
+		leftTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		rightTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		topTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottomTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
 		
+		//Limit this system to the size of the world
 		if(leftTile < 0) leftTile = 0;
 		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
 		if(topTile < 0) topTile = 0;
 		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
 		
+		//Get the 4 grid spaces surrounding the player.
 		for(int i=leftTile; i<=rightTile; i++)
 		{
 			for(int j=topTile; j<=bottomTile; j++)
 			{
+				
+				//If player is inside a solid
 				if(world.tileDecor[j][i]!=World.DECO_NONE){
+					
+					//Cancel Movement
 					x = oldx;
 					y = oldy;
 				}
 			}
 		}	
 		
+		//Now we must repeat the process in the y-axis (this allows the preservation of motion in one component when moving diagonally)
+		
+		//Player's old position
 		oldx = x;
 		oldy = y;
+		
+		//Move Vertically
 		y += vy;
 		
+		/*Vertical Collision Checking
+		 * 
+		 *Basically, this retrieves the place each of the player's sides
+		 *left tile and right tile return the columns either side of the player is in
+		 *top tile and bottom tile return the rows on top and below the tile
+		 */
 		leftTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
 		rightTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
 		topTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
 		bottomTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
 		
+		//Limit this system to the size of the world
 		if(leftTile < 0) leftTile = 0;
 		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
 		if(topTile < 0) topTile = 0;
 		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
 		
+		//Get the 4 grid spaces surrounding the player.
 		for(int i=leftTile; i<=rightTile; i++)
 		{
 			for(int j=topTile; j<=bottomTile; j++)
 			{
+				
+				//If player is inside a solid
 				if(world.tileDecor[j][i]!=World.DECO_NONE)
 				{
+					
+					//Cancel Movement
 					x = oldx;
 					y = oldy;
 				}
 			}
 		}	
 		
-		if(x<-1600+(TheCalm.VIEW_H/2)){
-			x = -1600+(TheCalm.VIEW_H/2);
-		}
-		if((x+width)>1600+(TheCalm.VIEW_H/2)){
-			x = 1600-width+(TheCalm.VIEW_H/2);
-		}
-		if(y<-1600+(TheCalm.VIEW_V/2)){
-			y = -1600+(TheCalm.VIEW_V/2);
-		}
-		if((y+height)>1600+(TheCalm.VIEW_V/2)){
-			y = 1600-height+(TheCalm.VIEW_V/2);
-		}
+		//Collisions for if the player tries to leave the map.
+		if(x<-World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = -World.WORLD_SIZE/2+(TheCalm.VIEW_H/2);
+		if((x+width)>World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = World.WORLD_SIZE/2-width+(TheCalm.VIEW_H/2);
+		if(y<-World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = -World.WORLD_SIZE/2+(TheCalm.VIEW_V/2);
+		if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
 	}
 	
+	//Draw player
 	void draw(){
 		gc.setColor(Color.DARK_GRAY);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}
 	
+	//Draw player's GUI/HUD elements
 	void drawGUI(){
 		gc.setColor(Color.RED);
 		gc.fillRect(20, 20, gc.getDrawWidth()/3,20);
@@ -255,30 +307,36 @@ class Player extends Rectangle{
 		gc.fillRect(20, 20, (int)((stam/mstam)*(gc.getDrawWidth()/3)),20);
 	}
 	
+	//Getter for bullet arraylist
 	ArrayList<Bullet> getBullets(){
 		return bullets;
 	}
 	
+	//Checking for key press, with code or char
 	boolean keyDown(char key){
 		return gc.isKeyDown(key);
 	}
-
+	
 	boolean keyDown(int key){
 		return gc.isKeyDown(key);
 	}
 	
+	//Get if mouse was clicked this step
 	boolean mouseButtonClicked(int button){
 		return gc.getMouseClick()>0 && gc.getMouseButton(button);
 	}
 	
+	//Get if mouse is held down (combine with !mouseButtonClicked() if you want it to be exclusive)
 	boolean mouseButtonDown(int button){
 		return gc.getMouseButton(button);
 	}
 	
+	//Return the direction the player is moving horizontally (not the input direction)
 	int getDirVX(){
 		return (int)Math.signum(vx);
 	}
 	
+	//Return the direction the player is moving vertically (not the input direction)
 	int getDirVY(){
 		return (int)Math.signum(vy);
 	}
