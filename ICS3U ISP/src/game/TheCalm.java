@@ -131,7 +131,6 @@ public class TheCalm {
 		
 		//Monster pathfinding + movement
 		for(Monster m : monsters) {
-			m.seek();
 			m.move();
 		}
 		
@@ -174,7 +173,7 @@ public class TheCalm {
 	void draw(){
 		
 		//Draw world (terrain, natural objects)
-		world.draw();
+		world.draw(player.gx, player.gy);
 		
 		//Draw Bullets
 		for(Bullet b : player.getBullets()) {

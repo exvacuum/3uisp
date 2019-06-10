@@ -38,6 +38,10 @@ class Player extends Rectangle{
 	//World
 	World world;
 	
+	//Grid position on world
+	int gx = 0;
+	int gy = 0;
+	
 	//Tiles surrounding player,
 	int leftTile, rightTile, topTile, bottomTile;
 	
@@ -229,6 +233,10 @@ class Player extends Rectangle{
 		if((x+width)>World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = World.WORLD_SIZE/2-width+(TheCalm.VIEW_H/2);
 		if(y<-World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = -World.WORLD_SIZE/2+(TheCalm.VIEW_V/2);
 		if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
+		
+		//Get grid position
+		gx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width/2))/(double)World.GRID_SIZE);
+		gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);
 	}
 	
 	//Draw player

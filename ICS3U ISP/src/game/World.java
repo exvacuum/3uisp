@@ -103,44 +103,52 @@ public class World {
 	}
 	
 	//Draw the world
-	void draw(){
+	void draw(int playergx, int playergy){
 		
 		//For every tile (there should be like 10000 or something crazy like that)
 		for(int row = 0; row < GRID_NUM; row++){
 			for(int col = 0; col < GRID_NUM; col++){	
 				
-				//Check tile value and set color
-				switch((int)Math.signum(Math.round(tileVals[row][col]))){
-				case TILE_GRASSY:
-					gc.setColor(new Color(Color.HSBtoRGB(113/360f, 0.85f, 0.87f*((float)(-tileVals[row][col])/6)+0.1f)));
-					break;
-				case TILE_DIRTY:
-					gc.setColor(new Color(Color.HSBtoRGB(50/360f, 0.85f, 0.97f*((float)(tileVals[row][col])/6)+0.4f)));
-					break;
-				case TILE_MOSSY:
-					gc.setColor(new Color(Color.HSBtoRGB(90/360f, 0.85f, 0.77f*((float)(tileVals[row][col])/6)+0.1f)));
-					break;
-				}
-				//draw bg
-				gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+				int xdiff = Math.abs(col-playergx);
+				int ydiff = Math.abs(row-playergy);
 				
-				//Check whether to draw this tile, and set color if so
-				boolean drawThis = true;
-				switch(tileDecor[row][col]){
-				case DECO_TREE:
-					gc.setColor(new Color(Color.HSBtoRGB(70/360f, 0.85f, 0.4f*((float)(-tileVals[row][col])/6)+0.5f)));
-					break;
-				case DECO_STONE:
-					gc.setColor(new Color(Color.HSBtoRGB(0/360f, 0f, 0.3f*((float)(tileVals[row][col])/6)+0.2f)));
-					break;
-				default:
-					drawThis = false;
-					break;
-				}
-				
-				//Draw Solids
-				if(drawThis){
-					gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+				//Draw blocks which are on screen
+				if((xdiff<TheCalm.VIEW_H/World.GRID_SIZE) && (ydiff<TheCalm.VIEW_V/World.GRID_SIZE)) {
+					
+					//Check tile value and set color
+					switch((int)Math.signum(Math.round(tileVals[row][col]))){
+					case TILE_GRASSY:
+						gc.setColor(new Color(Color.HSBtoRGB(113/360f, 0.85f, 0.87f*((float)(-tileVals[row][col])/6)+0.1f)));
+						break;
+					case TILE_DIRTY:
+						gc.setColor(new Color(Color.HSBtoRGB(50/360f, 0.85f, 0.97f*((float)(tileVals[row][col])/6)+0.4f)));
+						break;
+					case TILE_MOSSY:
+						gc.setColor(new Color(Color.HSBtoRGB(90/360f, 0.85f, 0.77f*((float)(tileVals[row][col])/6)+0.1f)));
+						break;
+					}
+					//draw bg if there is no solid here
+					if(tileDecor[row][col]==DECO_NONE){
+						gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+					}
+					//Check whether to draw this tile, and set color if so
+					boolean drawThis = true;
+					switch(tileDecor[row][col]){
+					case DECO_TREE:
+						gc.setColor(new Color(Color.HSBtoRGB(70/360f, 0.85f, 0.4f*((float)(-tileVals[row][col])/6)+0.5f)));
+						break;
+					case DECO_STONE:
+						gc.setColor(new Color(Color.HSBtoRGB(0/360f, 0f, 0.3f*((float)(tileVals[row][col])/6)+0.2f)));
+						break;
+					default:
+						drawThis = false;
+						break;
+					}
+					
+					//Draw Solids
+					if(drawThis){
+						gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
+					}
 				}
 			}
 		}
