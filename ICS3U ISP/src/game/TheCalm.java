@@ -27,7 +27,7 @@ public class TheCalm {
 	Viewport viewport = new Viewport(0,0, gc);
 	
 	//World
-	World world = new World(-(1600-(VIEW_H/2)),-(1600-(VIEW_V/2)), viewport, gc);
+	World world = new World(-(World.WORLD_SIZE/2-(VIEW_H/2)),-(World.WORLD_SIZE/2-(VIEW_V/2)), viewport, gc);
 	
 	//Player
 	Player player = new Player(world, viewport, gc);
