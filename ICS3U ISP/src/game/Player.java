@@ -17,11 +17,11 @@ class Player extends Rectangle{
 	//Health
 	double hp = 100;
 	
-	//Velocity, acceleration, stamina
-	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100;
+	//Velocity, acceleration, stamina, ammo, reload speed
+	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100, ammo = 10, mammo = 10, reloadSpeed = 0.1;
 	
-	//Direction, fire rate, speed multiplier
-	int dx = 0, dy = 0, fireRateDelay = 100, vMulti = 1;		
+	//Direction, fire rate, ammo, speed multiplier
+	int dx = 0, dy = 0, fireRateDelay = 200, vMulti = 1;		
 	
 	//Graphics Console
 	GraphicsConsole gc;
@@ -29,8 +29,9 @@ class Player extends Rectangle{
 	//Bullets List
 	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	
-	//Boolean for regulating rate of fire
+	//Booleans for regulating rate of fire and reloading state
 	boolean canFire = true;
+	boolean reloading = false;
 	
 	//Viewport
 	Viewport viewport;
@@ -125,13 +126,28 @@ class Player extends Rectangle{
 			}
 			
 			//Fire Bullets from the center of the player, accounting for delay caused by fire rate
-			if((mouseButtonDown(0)&&canFire)){
-				Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
-				bullets.add(b);
-				canFire = false;
-				Timer fireRateTimer = new Timer();
-				TimerTask fireRateTask = new FireRateControl();
-				fireRateTimer.schedule(fireRateTask, fireRateDelay);
+			if(ammo>0&&!reloading){
+				if((mouseButtonDown(0)&&canFire)){
+						Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
+						bullets.add(b);
+						canFire = false;
+						Timer fireRateTimer = new Timer();
+						TimerTask fireRateTask = new FireRateControl();
+						fireRateTimer.schedule(fireRateTask, fireRateDelay);
+						ammo--;
+				}
+			}else{
+				if(!reloading){
+					reloading = true;
+				}else{
+					if(ammo < mammo){
+						ammo+=reloadSpeed;
+					}else{
+						ammo = mammo;
+						reloading = false;
+					}
+				}
+				
 			}
 		}
 		
@@ -247,10 +263,14 @@ class Player extends Rectangle{
 	
 	//Draw player's GUI/HUD elements
 	void drawGUI(){
-		gc.setColor(Color.RED);
+		gc.setColor(Color.BLACK);
 		gc.fillRect(20, 20, gc.getDrawWidth()/3,20);
 		gc.setColor(Color.YELLOW);
 		gc.fillRect(20, 20, (int)((stam/mstam)*(gc.getDrawWidth()/3)),20);
+		gc.setColor(Color.BLACK);
+		gc.fillRect(20, 45, gc.getDrawWidth()/4,10);
+		gc.setColor(Color.BLUE.brighter());
+		gc.fillRect(20, 45, (int)((ammo/mammo)*(gc.getDrawWidth()/4)),10);
 	}
 	
 	//Getter for bullet arraylist
