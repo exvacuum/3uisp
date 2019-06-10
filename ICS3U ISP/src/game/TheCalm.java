@@ -209,9 +209,9 @@ public class TheCalm {
 	//Spawn monsterNum number of monsters, and then disable monster spawning until timer enables it again
 	void spawnMonsters(){
 		for(int i = 0; i < monsterNum; i++) {
-			if(monsters.size()<10000){
-				int x  = (int)((Math.random()*640)+1);
-				int y  = (int)((Math.random()*480)+1);
+			if(monsters.size()<100){
+				int x  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
+				int y  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
 				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
 				monsters.add(m);
 			}

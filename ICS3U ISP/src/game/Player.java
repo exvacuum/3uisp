@@ -210,81 +210,19 @@ class Player extends Rectangle{
 		//Move Horizontally
 		x += vx;
 		
-		/*Horizontal Collision Checking
-		 * 
-		 *Basically, this retrieves the place each of the player's sides
-		 *left tile and right tile return the columns either side of the player is in
-		 *top tile and bottom tile return the rows on top and below the tile
-		 */
-		leftTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		rightTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		topTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottomTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
-		
-		//Limit this system to the size of the world
-		if(leftTile < 0) leftTile = 0;
-		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
-		if(topTile < 0) topTile = 0;
-		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
-		
-		//Get the 4 grid spaces surrounding the player.
-		for(int i=leftTile; i<=rightTile; i++)
-		{
-			for(int j=topTile; j<=bottomTile; j++)
-			{
-				
-				//If player is inside a solid
-				if(world.tileDecor[j][i]!=World.DECO_NONE){
-					
-					//Cancel Movement
-					x = oldx;
-					y = oldy;
-				}
-			}
-		}	
-		
-		//Now we must repeat the process in the y-axis (this allows the preservation of motion in one component when moving diagonally)
+		//Horizontal Collision Checking
+		collisions(oldx, oldy);
 		
 		//Player's old position
 		oldx = x;
 		oldy = y;
 		
-		//Move Vertically
+		/*Now we must repeat the process in the y-axis (this allows the preservation of motion in one component when moving diagonally)
+		Move Vertically */
 		y += vy;
 		
-		/*Vertical Collision Checking
-		 * 
-		 *Basically, this retrieves the place each of the player's sides
-		 *left tile and right tile return the columns either side of the player is in
-		 *top tile and bottom tile return the rows on top and below the tile
-		 */
-		leftTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		rightTile = (int)((1600-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		topTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottomTile = (int)((1600-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
-		
-		//Limit this system to the size of the world
-		if(leftTile < 0) leftTile = 0;
-		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
-		if(topTile < 0) topTile = 0;
-		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
-		
-		//Get the 4 grid spaces surrounding the player.
-		for(int i=leftTile; i<=rightTile; i++)
-		{
-			for(int j=topTile; j<=bottomTile; j++)
-			{
-				
-				//If player is inside a solid
-				if(world.tileDecor[j][i]!=World.DECO_NONE)
-				{
-					
-					//Cancel Movement
-					x = oldx;
-					y = oldy;
-				}
-			}
-		}	
+		//Vertical Collision Checking
+		collisions(oldx, oldy);
 		
 		//Collisions for if the player tries to leave the map.
 		if(x<-World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = -World.WORLD_SIZE/2+(TheCalm.VIEW_H/2);
@@ -339,5 +277,42 @@ class Player extends Rectangle{
 	//Return the direction the player is moving vertically (not the input direction)
 	int getDirVY(){
 		return (int)Math.signum(vy);
+	}
+	
+	//Collision Checking
+	void collisions(double oldx, double oldy){
+		
+		/*Collision Checking
+		 * 
+		 *Basically, this retrieves the place each of the player's sides
+		 *left tile and right tile return the columns either side of the player is in
+		 *top tile and bottom tile return the rows on top and below the tile
+		 */
+		leftTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
+		rightTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
+		topTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
+		bottomTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
+		
+		//Limit this system to the size of the world
+		if(leftTile < 0) leftTile = 0;
+		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
+		if(topTile < 0) topTile = 0;
+		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
+		
+		//Get the 4 grid spaces surrounding the player.
+		for(int i=leftTile; i<=rightTile; i++)
+		{
+			for(int j=topTile; j<=bottomTile; j++)
+			{
+				
+				//If player is inside a solid
+				if(world.tileDecor[j][i]!=World.DECO_NONE){
+					
+					//Cancel Movement
+					x = oldx;
+					y = oldy;
+				}
+			}
+		}	
 	}
 }

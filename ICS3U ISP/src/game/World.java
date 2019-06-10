@@ -58,7 +58,7 @@ public class World {
 			for(int col = 0; col < GRID_NUM; col++){
 				
 				//Use Perlin noise to assign a float value to that tile (The coefficient on the end causes the values to be more or less extreme)
-				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*10;
+				tileVals[row][col] = (float)Noise.noise(row*scl,col*scl)*8;
 				
 				//Debug Code to see a visual of the numbers constituting the tilemap (Uncomment below println function as well)
 				//System.out.printf("%2d",(int)Math.round(tileVals[row][col]));
@@ -124,14 +124,14 @@ public class World {
 				//draw bg
 				gc.fillRect((int)(tileBounds[row][col].x-viewport.getxOffset()), (int)(tileBounds[row][col].y-viewport.getyOffset()), GRID_SIZE, GRID_SIZE);
 				
-				//Check whether to draw this tile, adn set color if so
+				//Check whether to draw this tile, and set color if so
 				boolean drawThis = true;
 				switch(tileDecor[row][col]){
 				case DECO_TREE:
-					gc.setColor(new Color(Color.HSBtoRGB(70/360f, 0.85f, 0.5f*((float)(-tileVals[row][col])/6)+0.5f)));
+					gc.setColor(new Color(Color.HSBtoRGB(70/360f, 0.85f, 0.4f*((float)(-tileVals[row][col])/6)+0.5f)));
 					break;
 				case DECO_STONE:
-					gc.setColor(new Color(Color.HSBtoRGB(0/360f, 0f, 0.6f*((float)(tileVals[row][col])/6)+0.2f)));
+					gc.setColor(new Color(Color.HSBtoRGB(0/360f, 0f, 0.3f*((float)(tileVals[row][col])/6)+0.2f)));
 					break;
 				default:
 					drawThis = false;
