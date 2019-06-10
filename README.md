@@ -5,8 +5,8 @@ Trello to see current progress: https://trello.com/b/OildaD2A/ics3u-isp
 
 # NOTE: 
 
-Due to extreme diligence, massive leaps in progress have been made in just a few short days. It appears as of now that the project will finish ahead of schedule.
-
+Due to extreme diligence, massive leaps in progress have been made in just a few short days. It appears as of now that the project will have more features than previously mentioned 
+F
 # ICS3U ISP ACTION PLAN
 
 Part 1: Program Outline
