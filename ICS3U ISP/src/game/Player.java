@@ -15,7 +15,7 @@ class Player extends Rectangle{
 	double x,y;
 	
 	//Health
-	double hp = 100;
+	double hp = 100, mhp = 100;
 	
 	//Velocity, acceleration, stamina, ammo, reload speed, body heat
 	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100, ammo = 10, mammo = 10, reloadSpeed = 0.1, heat = 0, mheat = 100;
@@ -181,8 +181,8 @@ class Player extends Rectangle{
 					angle = Math.atan2(x - (gc.getMouseX() + viewport.getxOffset()), y - (gc.getMouseY() + viewport.getyOffset()));
 				    
 				    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
-				    bdx = 50*Math.sin(angle);
-				    bdy = 50*Math.cos(angle);
+				    bdx = 75*Math.sin(angle);
+				    bdy = 75*Math.cos(angle);
 					
 				    //Endpoint for blade
 				    bpx = (x+width/2-bdx);
@@ -210,6 +210,11 @@ class Player extends Rectangle{
 					overHeated = false;
 				}
 			}
+			
+			//HPDRAIN
+			if(keyDown(' ')){
+				hp-=1;
+			}	
 			
 		}
 		
@@ -324,18 +329,24 @@ class Player extends Rectangle{
 			gc.setColor(Color.GRAY);
 			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()), (int)(bpy-viewport.getyOffset()));
 		}
-		gc.setColor(Color.DARK_GRAY);
+		gc.setColor(Color.RED);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}
 	
 	//Draw player's GUI/HUD elements
 	void drawGUI(){
 		
+		//HP
+		gc.setColor(Color.BLACK);
+		gc.fillRect(5, 5, 300, 10);
+		gc.setColor((hp/mhp<0.2) ? Color.RED : Color.GREEN);
+		gc.fillRect(5, 5, (int)((hp/mhp)*300),10);
+		
 		//Heat
 		gc.setColor((overHeated) ? new Color(255,50,0) : new Color(255,100,0));
-		gc.fillRect(20, 20, 10, 35);
+		gc.fillRect(5, 20, 25, 35);
 		gc.setColor(Color.BLACK);
-		gc.fillRect(20, 20, 10, (int)((1-(heat/mheat))*35));
+		gc.fillRect(5, 20, 25, (int)((1-(heat/mheat))*35));
 		
 		//Stamina
 		gc.setColor(Color.BLACK);
