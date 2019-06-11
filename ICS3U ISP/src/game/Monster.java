@@ -36,6 +36,9 @@ class Monster extends Rectangle{
 	//Boolean to decide whether to collide with solids
 	boolean collides = false;
 	
+	//Invincibility boolean (For I-frames)
+	boolean invincible = false;
+	
 	//Direction + magnitude (Component vectors I guess)
 	double dxmag, dymag;
 	
@@ -55,6 +58,7 @@ class Monster extends Rectangle{
 	//Set color back to normal after hit frames
 	class HitControl extends TimerTask{
 		public void run(){
+			invincible = false;
 			color = dColor;
 		}
 	}
@@ -167,34 +171,49 @@ class Monster extends Rectangle{
 		setBounds((int)x,(int)y,width,height);
 	}
 	
-	//Respond to being hit (knockback, flash red)
+	//Respond to being hit with melee (knockback, flash red)
+		void hurt(){
+			if(!invincible) {
+				invincible = true;
+				hp--;
+				color = new Color(100,0,0);
+				Timer hitTimer = new Timer();
+				TimerTask hitTask = new HitControl();
+				hitTimer.schedule(hitTask, 200);
+			}
+		}
+	
+	//Respond to being hit by bullet (knockback, flash red)
 	void hurt(Bullet b){
-		
-		//Monster's old position
-		double oldx = x;
-		double oldy = y;
-		
-		//Horizontal Knockback
-		x+=b.dx*3;
-		
-		//Horizontal Collision
-		collisions(oldx, oldy);
-		
-		//Monster's old position
-		oldx = x;
-		oldy = y;
-				
-		//Vertical Knockback
-		y+=b.dy*3;
-				
-		//Vertical Collision
-		collisions(oldx, oldy);
-		
-		hp--;
-		color = new Color(100,0,0);
-		Timer hitTimer = new Timer();
-		TimerTask hitTask = new HitControl();
-		hitTimer.schedule(hitTask, 200);
+		if(!invincible) {
+			
+			//Monster's old position
+			double oldx = x;
+			double oldy = y;
+			
+			//Horizontal Knockback
+			x+=b.dx*3;
+			
+			//Horizontal Collision
+			collisions(oldx, oldy);
+			
+			//Monster's old position
+			oldx = x;
+			oldy = y;
+					
+			//Vertical Knockback
+			y+=b.dy*3;
+					
+			//Vertical Collision
+			collisions(oldx, oldy);
+			
+			hp--;
+			invincible = true;
+			color = new Color(100,0,0);
+			Timer hitTimer = new Timer();
+			TimerTask hitTask = new HitControl();
+			hitTimer.schedule(hitTask, 200);
+		}
 	}
 	
 	void collisions(double oldx, double oldy){

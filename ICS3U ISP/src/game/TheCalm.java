@@ -160,6 +160,11 @@ public class TheCalm {
 				}
 			}
 			
+			//If hit by sword
+			if(player.swinging && m.intersectsLine(player.x, player.y, player.bpx,player.bpy)&&(player.bv>=5||player.vx!=0||player.vy!=0)){
+				m.hurt();
+			}
+			
 			//Monster death
 			if(m.hp<=0){
 				x_monsters.add(m);

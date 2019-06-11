@@ -17,11 +17,11 @@ class Player extends Rectangle{
 	//Health
 	double hp = 100;
 	
-	//Velocity, acceleration, stamina, ammo, reload speed
-	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100, ammo = 10, mammo = 10, reloadSpeed = 0.1;
+	//Velocity, acceleration, stamina, ammo, reload speed, body heat
+	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100, ammo = 10, mammo = 10, reloadSpeed = 0.1, heat = 0, mheat = 100;
 	
-	//Direction, fire rate, ammo, speed multiplier
-	int dx = 0, dy = 0, fireRateDelay = 200, vMulti = 1;		
+	//Direction, fire & swing rate, ammo, speed multiplier
+	int dx = 0, dy = 0, fireRateDelay = 200, swingDelay = 500, vMulti = 1;		
 	
 	//Graphics Console
 	GraphicsConsole gc;
@@ -32,6 +32,13 @@ class Player extends Rectangle{
 	//Booleans for regulating rate of fire and reloading state
 	boolean canFire = true;
 	boolean reloading = false;
+	
+	//Blade direction and position, and velocity
+	double bdx,bdy, bpx, bpy, angle, oangle, bv;
+	
+	//Booleans for regulating swinging and overheating
+	boolean swinging = false;
+	boolean overHeated = false;
 	
 	//Viewport
 	Viewport viewport;
@@ -54,7 +61,7 @@ class Player extends Rectangle{
 	        canFire = true;
 	    } 
 	} 
-			
+	
 	Player(World world, Viewport viewport, GraphicsConsole gc){
 		this.world = world;
 		this.gc = gc;
@@ -126,7 +133,7 @@ class Player extends Rectangle{
 			}
 			
 			//Fire Bullets from the center of the player, accounting for delay caused by fire rate
-			if(ammo>0&&!reloading){
+			if(ammo>0&&!reloading&&!keyDown('R')){
 				if((mouseButtonDown(0)&&canFire)){
 						Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
 						bullets.add(b);
@@ -149,6 +156,61 @@ class Player extends Rectangle{
 				}
 				
 			}
+			
+			//Melee attacks
+			if(!overHeated){
+				if(mouseButtonClicked(2)){
+					heat+=10;
+				}
+				if(mouseButtonDown(2)){
+					
+					//Heat up and enable swinging
+					if(bv!=0||vx!=0||vy!=0){
+						heat += 0.75;
+					}else{
+						heat += 0.3;
+					}
+					swinging =  true;
+					
+					//Angle
+					
+					//Old angle
+					oangle = angle;
+					
+					//New angle
+					angle = Math.atan2(x - (gc.getMouseX() + viewport.getxOffset()), y - (gc.getMouseY() + viewport.getyOffset()));
+				    
+				    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
+				    bdx = 50*Math.sin(angle);
+				    bdy = 50*Math.cos(angle);
+					
+				    //Endpoint for blade
+				    bpx = (x+width/2-bdx);
+				    bpy = (y+height/2-bdy);
+				    
+				    //Get swing speed
+				    bv = 100*Math.abs(angle-oangle);
+				    
+				}else{
+					swinging = false;
+				}
+				if(heat>=mheat){
+					overHeated = true;
+				}
+			}else{
+				swinging = false;
+			}
+			
+			//Natural cooling (Independent of input)
+			if(heat>0){
+				heat-=0.25;
+			}else{
+				heat = 0;
+				if(overHeated){
+					overHeated = false;
+				}
+			}
+			
 		}
 		
 		//Horizontal velocity direction
@@ -257,20 +319,35 @@ class Player extends Rectangle{
 	
 	//Draw player
 	void draw(){
+		if(swinging){
+			gc.setStroke(10);
+			gc.setColor(Color.GRAY);
+			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()), (int)(bpy-viewport.getyOffset()));
+		}
 		gc.setColor(Color.DARK_GRAY);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}
 	
 	//Draw player's GUI/HUD elements
 	void drawGUI(){
+		
+		//Heat
+		gc.setColor((overHeated) ? new Color(255,50,0) : new Color(255,100,0));
+		gc.fillRect(20, 20, 10, 35);
 		gc.setColor(Color.BLACK);
-		gc.fillRect(20, 20, gc.getDrawWidth()/3,20);
+		gc.fillRect(20, 20, 10, (int)((1-(heat/mheat))*35));
+		
+		//Stamina
+		gc.setColor(Color.BLACK);
+		gc.fillRect(35, 20, gc.getDrawWidth()/3,20);
 		gc.setColor(Color.YELLOW);
-		gc.fillRect(20, 20, (int)((stam/mstam)*(gc.getDrawWidth()/3)),20);
+		gc.fillRect(35, 20, (int)((stam/mstam)*(gc.getDrawWidth()/3)),20);
+		
+		//Ammo
 		gc.setColor(Color.BLACK);
-		gc.fillRect(20, 45, gc.getDrawWidth()/4,10);
+		gc.fillRect(35, 45, gc.getDrawWidth()/4,10);
 		gc.setColor(Color.BLUE.brighter());
-		gc.fillRect(20, 45, (int)((ammo/mammo)*(gc.getDrawWidth()/4)),10);
+		gc.fillRect(35, 45, (int)((ammo/mammo)*(gc.getDrawWidth()/4)),10);
 	}
 	
 	//Getter for bullet arraylist
@@ -278,7 +355,7 @@ class Player extends Rectangle{
 		return bullets;
 	}
 	
-	//Checking for key press, with code or char
+	//Checking for key down, with code or char
 	boolean keyDown(char key){
 		return gc.isKeyDown(key);
 	}
