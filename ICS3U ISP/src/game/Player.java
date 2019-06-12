@@ -46,6 +46,11 @@ class Player extends Rectangle{
 	boolean swinging = false;
 	boolean overHeated = false;
 	
+	//Drill boolean and position
+	boolean drilling = false;
+	int dgx = 0;
+	int dgy = 0;
+	
 	//Boolean for death
 	boolean dead = false;
 	
@@ -158,7 +163,7 @@ class Player extends Rectangle{
 				
 				//Fire Bullets from the center of the player, accounting for delay caused by fire rate
 				if(ammo>0&&!reloading&&!keyDown('R')){
-					if((mouseButtonDown(0)&&canFire)){
+					if((mouseButtonDown(0)&&canFire&&!keyDown(GraphicsConsole.VK_CONTROL))){
 							Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
 							bullets.add(b);
 							canFire = false;
@@ -181,8 +186,53 @@ class Player extends Rectangle{
 					
 				}
 				
-				//Melee attacks
+				//Break blocks
 				if(!overHeated){
+					if((mouseButtonDown(0)&&keyDown(GraphicsConsole.VK_CONTROL))){
+						
+						heat += 3;
+						drilling = true;
+						
+						//Angle
+						angle = Math.atan2(x + 16 - (gc.getMouseX() + viewport.getxOffset()), y + 16 - (gc.getMouseY() + viewport.getyOffset()));
+					    
+					    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
+					    bdx = 25*Math.sin(angle);
+					    bdy = 25*Math.cos(angle);
+						
+					    //Endpoint for blade
+					    bpx = (x+width/2-bdx);
+					    bpy = (y+height/2-bdy);
+					    
+					    //Drilling block
+					    dgx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(bpx))/(double)World.GRID_SIZE);
+						dgy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(bpy))/(double)World.GRID_SIZE);
+						
+						//Resource Collection
+						switch(world.tileDecor[dgy][dgx]){
+						case World.DECO_NONE:
+							break;
+						case World.DECO_STONE:
+							world.tileDecor[dgy][dgx]=World.DECO_NONE;
+							inventory[INV_STONE]++;
+							break;
+						case World.DECO_TREE:
+							world.tileDecor[dgy][dgx]=World.DECO_NONE;
+							inventory[INV_WOOD]++;
+							break;
+						}
+					}else{
+						drilling = false;
+					}
+					if(heat>=mheat){
+						overHeated = true;
+					}
+				}else{
+					drilling = false;
+				}
+				
+				//Melee attacks
+				if(!overHeated&&!keyDown(GraphicsConsole.VK_CONTROL)){
 					if(mouseButtonClicked(2)){
 						heat+=10;
 					}
@@ -202,7 +252,7 @@ class Player extends Rectangle{
 						oangle = angle;
 						
 						//New angle
-						angle = Math.atan2(x - (gc.getMouseX() + viewport.getxOffset()), y - (gc.getMouseY() + viewport.getyOffset()));
+						angle = Math.atan2(x + 16 - (gc.getMouseX() + viewport.getxOffset()), y + 16 - (gc.getMouseY() + viewport.getyOffset()));
 					    
 					    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
 					    bdx = 75*Math.sin(angle);
@@ -242,7 +292,6 @@ class Player extends Rectangle{
 				}else{
 					hp = mhp;
 				}
-				
 			}
 		}
 		//Horizontal velocity direction
@@ -358,6 +407,13 @@ class Player extends Rectangle{
 			gc.setColor(Color.GRAY);
 			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()), (int)(bpy-viewport.getyOffset()));
 		}
+		
+		if(drilling){
+			gc.setStroke(15);
+			gc.setColor(Color.DARK_GRAY);
+			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()+(Math.random()*3*(Math.random()>0.5 ? 1:-1))), (int)(bpy-viewport.getyOffset()+(Math.random()*3*(Math.random()>0.5 ? 1:-1))));
+		}
+		
 		gc.setColor(dead ? Color.BLACK : color);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}

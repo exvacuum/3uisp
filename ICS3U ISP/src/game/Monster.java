@@ -144,8 +144,8 @@ class Monster extends Rectangle{
 	    	collides = false;
 	    	camps = true;
 	    	shoots = true;
-	    	aggroRad = 100;
-	    	deAggroRad = 300;
+	    	aggroRad = 150;
+	    	deAggroRad = 200;
 	    	fireRateDelay = 3000;
 	    }
 	}
@@ -210,11 +210,12 @@ class Monster extends Rectangle{
 			setBounds((int)x,(int)y,width,height);
 		}
 		
-		//Camp
+		//Camp if close
 		if(camps){
-			if(Math.abs(x-player.x)<=aggroRad||Math.abs(y-player.y)<=aggroRad){
+			if(Math.hypot(player.x-x,player.y-y)<=aggroRad){
 				camping=true;
-			}else if(Math.abs(x-player.x)>=deAggroRad||Math.abs(y-player.y)>=deAggroRad){
+			//If leaves deAggro radius, resume pursuit
+			}else if(Math.hypot(player.x-x,player.y-y)>=deAggroRad){
 				camping = false;
 			}
 		}
