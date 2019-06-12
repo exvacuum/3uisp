@@ -23,6 +23,12 @@ class Player extends Rectangle{
 	//Direction, fire & swing rate, ammo, speed multiplier
 	int dx = 0, dy = 0, fireRateDelay = 200, swingDelay = 500, vMulti = 1;		
 	
+	//Inventory
+	int[] inventory = new int[3];
+	static final int INV_SOUL = Pickup.PU_SOUL;
+	static final int INV_WOOD = Pickup.PU_WOOD;
+	static final int INV_STONE = Pickup.PU_STONE;
+	
 	//Graphics Console
 	GraphicsConsole gc;
 	
@@ -40,11 +46,21 @@ class Player extends Rectangle{
 	boolean swinging = false;
 	boolean overHeated = false;
 	
+	//Boolean for death
+	boolean dead = false;
+	
 	//Viewport
 	Viewport viewport;
 	
 	//World
 	World world;
+	
+	//Colors
+	Color dColor = Color.WHITE;
+	Color color = dColor;
+	
+	//I-frame boolean
+	boolean invincible = false;
 	
 	//Grid position on world
 	int gx = 0;
@@ -62,6 +78,14 @@ class Player extends Rectangle{
 	    } 
 	} 
 	
+	//Set color back to normal after hit frames
+	class HitControl extends TimerTask{
+		public void run(){
+			invincible = false;
+			color = dColor;
+		}
+	}
+	
 	Player(World world, Viewport viewport, GraphicsConsole gc){
 		this.world = world;
 		this.gc = gc;
@@ -77,147 +101,153 @@ class Player extends Rectangle{
 	}
 	
 	void input(){
-		
 		//Move
 		
 		//By default directions are 0 
 		dx=dy=0;
-		if(gc.isFocused()){
-			
-			//UP
-			if(keyDown('W')){
-				dy--;
-			}
-			
-			//DOWN
-			if(keyDown('S')){
-				dy++;
-			}
-			
-			//LEFT
-			if(keyDown('A')){
-				dx--;
-			}
-			
-			//RIGHT
-			if(keyDown('D')){
-				dx++;
-			}
-			
-			//Sprint if shift is pressed and moving
-			if(keyDown(GraphicsConsole.VK_SHIFT)&&stam>0&&(dx!=0||dy!=0)){
+		if(!dead){
+			if(gc.isFocused()){
 				
-				//Double acceleration and maximum velocity
-				vMulti = 2;
-				
-				//Drain Stamina
-				stam -= 1;
-			}else{
-				
-				//Reset speed multiplier
-				vMulti = 1;
-				
-				//Catch stamina when it dips below 0
-				if(stam<0){
-					stam = 0;
+				//UP
+				if(keyDown('W')){
+					dy--;
 				}
 				
-				//Regenerate stamina
-				if(stam<mstam){
-					stam+=0.1;
+				//DOWN
+				if(keyDown('S')){
+					dy++;
+				}
+				
+				//LEFT
+				if(keyDown('A')){
+					dx--;
+				}
+				
+				//RIGHT
+				if(keyDown('D')){
+					dx++;
+				}
+				
+				//Sprint if shift is pressed and moving
+				if(keyDown(GraphicsConsole.VK_SHIFT)&&stam>0&&(dx!=0||dy!=0)){
+					
+					//Double acceleration and maximum velocity
+					vMulti = 2;
+					
+					//Drain Stamina
+					stam -= 1;
 				}else{
 					
-					//catch stamina when it reaches its max
-					stam = mstam;
-				}
-			}
-			
-			//Fire Bullets from the center of the player, accounting for delay caused by fire rate
-			if(ammo>0&&!reloading&&!keyDown('R')){
-				if((mouseButtonDown(0)&&canFire)){
-						Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
-						bullets.add(b);
-						canFire = false;
-						Timer fireRateTimer = new Timer();
-						TimerTask fireRateTask = new FireRateControl();
-						fireRateTimer.schedule(fireRateTask, fireRateDelay);
-						ammo--;
-				}
-			}else{
-				if(!reloading){
-					reloading = true;
-				}else{
-					if(ammo < mammo){
-						ammo+=reloadSpeed;
+					//Reset speed multiplier
+					vMulti = 1;
+					
+					//Catch stamina when it dips below 0
+					if(stam<0){
+						stam = 0;
+					}
+					
+					//Regenerate stamina
+					if(stam<mstam){
+						stam+=0.1;
 					}else{
-						ammo = mammo;
-						reloading = false;
+						
+						//catch stamina when it reaches its max
+						stam = mstam;
 					}
 				}
 				
-			}
-			
-			//Melee attacks
-			if(!overHeated){
-				if(mouseButtonClicked(2)){
-					heat+=10;
-				}
-				if(mouseButtonDown(2)){
-					
-					//Heat up and enable swinging
-					if(bv!=0||vx!=0||vy!=0){
-						heat += 0.75;
-					}else{
-						heat += 0.3;
+				//Fire Bullets from the center of the player, accounting for delay caused by fire rate
+				if(ammo>0&&!reloading&&!keyDown('R')){
+					if((mouseButtonDown(0)&&canFire)){
+							Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
+							bullets.add(b);
+							canFire = false;
+							Timer fireRateTimer = new Timer();
+							TimerTask fireRateTask = new FireRateControl();
+							fireRateTimer.schedule(fireRateTask, fireRateDelay);
+							ammo--;
 					}
-					swinging =  true;
+				}else{
+					if(!reloading){
+						reloading = true;
+					}else{
+						if(ammo < mammo){
+							ammo+=reloadSpeed;
+						}else{
+							ammo = mammo;
+							reloading = false;
+						}
+					}
 					
-					//Angle
-					
-					//Old angle
-					oangle = angle;
-					
-					//New angle
-					angle = Math.atan2(x - (gc.getMouseX() + viewport.getxOffset()), y - (gc.getMouseY() + viewport.getyOffset()));
-				    
-				    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
-				    bdx = 75*Math.sin(angle);
-				    bdy = 75*Math.cos(angle);
-					
-				    //Endpoint for blade
-				    bpx = (x+width/2-bdx);
-				    bpy = (y+height/2-bdy);
-				    
-				    //Get swing speed
-				    bv = 100*Math.abs(angle-oangle);
-				    
+				}
+				
+				//Melee attacks
+				if(!overHeated){
+					if(mouseButtonClicked(2)){
+						heat+=10;
+					}
+					if(mouseButtonDown(2)){
+						
+						//Heat up and enable swinging
+						if(bv!=0||vx!=0||vy!=0){
+							heat += 0.75;
+						}else{
+							heat += 0.3;
+						}
+						swinging =  true;
+						
+						//Angle
+						
+						//Old angle
+						oangle = angle;
+						
+						//New angle
+						angle = Math.atan2(x - (gc.getMouseX() + viewport.getxOffset()), y - (gc.getMouseY() + viewport.getyOffset()));
+					    
+					    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
+					    bdx = 75*Math.sin(angle);
+					    bdy = 75*Math.cos(angle);
+						
+					    //Endpoint for blade
+					    bpx = (x+width/2-bdx);
+					    bpy = (y+height/2-bdy);
+					    
+					    //Get swing speed
+					    bv = 100*Math.abs(angle-oangle);
+					    
+					}else{
+						swinging = false;
+					}
+					if(heat>=mheat){
+						overHeated = true;
+					}
 				}else{
 					swinging = false;
 				}
-				if(heat>=mheat){
-					overHeated = true;
+				
+				//Natural cooling (Independent of input)
+				if(heat>0){
+					heat-=0.25;
+				}else{
+					heat = 0;
+					if(overHeated){
+						overHeated = false;
+					}
 				}
-			}else{
-				swinging = false;
-			}
-			
-			//Natural cooling (Independent of input)
-			if(heat>0){
-				heat-=0.25;
-			}else{
-				heat = 0;
-				if(overHeated){
-					overHeated = false;
+				
+
+				//HP regen
+				//Regenerate stamina
+				if(hp<mhp){
+					hp+=0.005;
+				}else{
+					
+					//catch stamina when it reaches its max
+					hp = mhp;
 				}
+				
 			}
-			
-			//HPDRAIN
-			if(keyDown(' ')){
-				hp-=1;
-			}	
-			
 		}
-		
 		//Horizontal velocity direction
 		dvx = getDirVX();
 		
@@ -320,6 +350,8 @@ class Player extends Rectangle{
 		//Get grid position
 		gx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width/2))/(double)World.GRID_SIZE);
 		gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);
+		
+		setBounds((int)x,(int)y,width,height);
 	}
 	
 	//Draw player
@@ -329,7 +361,7 @@ class Player extends Rectangle{
 			gc.setColor(Color.GRAY);
 			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()), (int)(bpy-viewport.getyOffset()));
 		}
-		gc.setColor(Color.RED);
+		gc.setColor(dead ? Color.BLACK : color);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}
 	
@@ -343,7 +375,7 @@ class Player extends Rectangle{
 		gc.fillRect(5, 5, (int)((hp/mhp)*300),10);
 		
 		//Heat
-		gc.setColor((overHeated) ? new Color(255,50,0) : new Color(255,100,0));
+		gc.setColor((overHeated) ? new Color(150,150,150) : new Color(255,100,0));
 		gc.fillRect(5, 20, 25, 35);
 		gc.setColor(Color.BLACK);
 		gc.fillRect(5, 20, 25, (int)((1-(heat/mheat))*35));
@@ -359,6 +391,26 @@ class Player extends Rectangle{
 		gc.fillRect(35, 45, gc.getDrawWidth()/4,10);
 		gc.setColor(Color.BLUE.brighter());
 		gc.fillRect(35, 45, (int)((ammo/mammo)*(gc.getDrawWidth()/4)),10);
+		
+		//Inventory
+		
+		//Souls
+		gc.setColor(Color.MAGENTA);
+		gc.fillOval(10, 65, 12, 12);
+		gc.setColor(Color.BLACK);
+		gc.drawString(""+inventory[INV_SOUL],25,75);
+		
+		//Wood
+		gc.setColor(Color.ORANGE.darker().darker().darker().darker());
+		gc.fillOval(10, 85, 12, 12);
+		gc.setColor(Color.BLACK);
+		gc.drawString(""+inventory[INV_WOOD],25,95);
+		
+		//Stone
+		gc.setColor(Color.DARK_GRAY);
+		gc.fillOval(10, 105, 12, 12);
+		gc.setColor(Color.BLACK);
+		gc.drawString(""+inventory[INV_STONE],25, 115);
 	}
 	
 	//Getter for bullet arraylist
@@ -430,5 +482,41 @@ class Player extends Rectangle{
 				}
 			}
 		}	
+	}
+	
+	//Respond to being hit by bullet (knockback, flash red)
+	void hurt(Monster m){
+		if(!invincible) {
+			
+			//Player's old position
+			double oldx = x;
+			double oldy = y;
+			
+			//Horizontal Knockback
+			vx+=m.dx*5;
+			
+			//Horizontal Collision
+			collisions(oldx, oldy);
+			
+			//Monster's old position
+			oldx = x;
+			oldy = y;
+					
+			//Vertical Knockback
+			vy+=m.dy*5;
+					
+			//Vertical Collision
+			collisions(oldx, oldy);
+			
+			hp-=5;
+			invincible = true;
+			color = new Color(100,0,0);
+			Timer hitTimer = new Timer();
+			TimerTask hitTask = new HitControl();
+			hitTimer.schedule(hitTask, 1000);
+			if(hp<=0){
+				dead = true;
+			}
+		}
 	}
 }

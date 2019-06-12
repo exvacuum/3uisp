@@ -66,7 +66,9 @@ class Monster extends Rectangle{
 	//Allow retargeting of player
 	class ReaquireControl extends TimerTask{
 		public void run(){
-			targetPlayer();
+			if(!player.dead){
+				targetPlayer();
+			}
 		}
 	}
 	
@@ -133,7 +135,6 @@ class Monster extends Rectangle{
 	
 	//Move
 	void move(){
-		
 		//Monster's old position
 		double oldx = x;
 		double oldy = y;
@@ -185,7 +186,6 @@ class Monster extends Rectangle{
 	
 	//Respond to being hit by bullet (knockback, flash red)
 	void hurt(Bullet b){
-		if(!invincible) {
 			
 			//Monster's old position
 			double oldx = x;
@@ -213,7 +213,6 @@ class Monster extends Rectangle{
 			Timer hitTimer = new Timer();
 			TimerTask hitTask = new HitControl();
 			hitTimer.schedule(hitTask, 200);
-		}
 	}
 	
 	void collisions(double oldx, double oldy){

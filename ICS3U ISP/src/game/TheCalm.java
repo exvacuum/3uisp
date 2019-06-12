@@ -10,7 +10,7 @@ import hsa2x.GraphicsConsole;
 /**
  * The Calm: A survival game
  * This is the main game file, so you are in the right place.
- * @author bartsila533
+ * @author Silas Bartha
  *
  */
 
@@ -35,9 +35,13 @@ public class TheCalm {
 	//Monsters List
 	ArrayList<Monster> monsters = new ArrayList<Monster>();
 	
+	//Pickups List
+	ArrayList<Pickup> pickups = new ArrayList<Pickup>();
+	
 	//Lists for deletion of game objects
 	ArrayList<Monster> x_monsters = new ArrayList<Monster>();
 	ArrayList<Bullet> x_bullets = new ArrayList<Bullet>();
+	ArrayList<Pickup> x_pickups = new ArrayList<Pickup>();
 	
 	//Timers for game events
 	Timer monsterSpawnTimer = new Timer();
@@ -47,7 +51,7 @@ public class TheCalm {
 	
 	//Variables to decide whether to spawn monsters in a given step, and to control the number spawned
 	boolean willSpawnMonsters = false;
-	int monsterNum = 1;
+	int monsterNum = 10;
 	
 	//Enable monster spawning
 	private class monsterSpawn  extends TimerTask{
@@ -83,6 +87,7 @@ public class TheCalm {
 			//Clean up the garbage
 			monsters.removeAll(x_monsters);
 			player.getBullets().removeAll(x_bullets);
+			pickups.removeAll(x_pickups);
 			
 			//Logic
 			step();
@@ -149,7 +154,7 @@ public class TheCalm {
 			}
 		}
 		
-		//Check if monsters should be hurt
+		//Check if monsters should be hurt, or hurt player
 		for(Monster m : monsters){
 			for(Bullet b : player.getBullets()){
 		
@@ -163,14 +168,27 @@ public class TheCalm {
 			//If hit by sword
 			if(player.swinging && m.intersectsLine(player.x, player.y, player.bpx,player.bpy)&&(player.bv>=5||player.vx!=0||player.vy!=0)){
 				m.hurt();
+				//Hurt Player, only if not hurt itself
+			}else if(m.intersects(player)&&!player.dead){
+				player.hurt(m);
 			}
 			
 			//Monster death
 			if(m.hp<=0){
+				Pickup p = new Pickup(m.x+8,m.y+8,gc,getViewport(),player,Pickup.PU_SOUL);
+				pickups.add(p);
 				x_monsters.add(m);
 			}
 		}
-
+		
+		//Pickups
+		for(Pickup p : pickups){
+			if(p.intersects(player)){
+				p.givePlayer();
+				x_pickups.add(p);
+			}
+		}
+		
 		//Center viewport on player
 		getViewport().trackPlayer(player);
 	}
@@ -183,6 +201,11 @@ public class TheCalm {
 		//Draw Bullets
 		for(Bullet b : player.getBullets()) {
 			b.draw();
+		}
+		
+		//Draw pickups
+		for(Pickup p : pickups) {
+			p.draw();
 		}
 		
 		//Draw player
