@@ -3,6 +3,7 @@ package game;
 import java.awt.Color;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -14,6 +15,7 @@ class Monster extends Rectangle{
 	//Monster Types
 	static final int GHOUL = 0;
 	static final int GOBLIN = 1;
+	static final int FIRE_ELEMENTAL = 2;
 	
 	//Point to move towards
 	Point target;
@@ -33,8 +35,20 @@ class Monster extends Rectangle{
 	//Position, direction, velocity, and health
 	double x, y, dx, dy, dir, v, hp, mhp;
 	
-	//Boolean to decide whether to collide with solids
+	//Special variables for enemies that shoot
+	ArrayList<Projectile> projectiles = new ArrayList<Projectile>();
+	ArrayList<Projectile> x_projectiles = new ArrayList<Projectile>();
+	boolean canFire = true;
+	int fireRateDelay;
+	
+	//Special variables for enemies that camp
+	double aggroRad, deAggroRad;
+	boolean camping;
+	
+	//Booleans for attributes
 	boolean collides = false;
+	boolean shoots = false;
+	boolean camps = false;
 	
 	//Invincibility boolean (For I-frames)
 	boolean invincible = false;
@@ -72,6 +86,15 @@ class Monster extends Rectangle{
 		}
 	}
 	
+	//Fire Rate Control
+	private class FireRateControl extends TimerTask 
+	{ 
+	    public void run() 
+	    { 
+	        canFire = true;
+	    } 
+	} 
+
 	Monster(int x, int y, Player player, Viewport viewport, GraphicsConsole gc, int type){
 		this.x = x;
 		this.y = y;
@@ -101,6 +124,7 @@ class Monster extends Rectangle{
 	    	dColor = new Color(100,0,100,200);
 	    	color = dColor;
 	    	collides = false;
+	    	camps = false;
 	    	break;
 	    case GOBLIN:
 	    	hp = 5;
@@ -109,7 +133,20 @@ class Monster extends Rectangle{
 	    	dColor = new Color(0,100,0);
 	    	color = dColor;
 	    	collides = true;
+	    	camps = false;
 	    	break;
+	    case FIRE_ELEMENTAL:
+	    	hp = 1;
+	    	v = 1;
+	    	mhp = hp;
+	    	dColor = new Color(200,100,0,200);
+	    	color = dColor;
+	    	collides = false;
+	    	camps = true;
+	    	shoots = true;
+	    	aggroRad = 100;
+	    	deAggroRad = 300;
+	    	fireRateDelay = 3000;
 	    }
 	}
 	
@@ -135,41 +172,62 @@ class Monster extends Rectangle{
 	
 	//Move
 	void move(){
-		//Monster's old position
-		double oldx = x;
-		double oldy = y;
-		
-		//Move Horizontally
-		x += dx*v;
-		
-		//Horizontal collision
-		collisions(oldx, oldy);
-		
-		//Monster's old position
-		oldx = x;
-		oldy = y;
-		
-		/*Now we must repeat the process in the y-axis (this allows the preservation of motion in one component when moving diagonally)
-		Move Vertically */
-		y += dy*v;
-		
-		//Vertical collision
-		collisions(oldx, oldy);
-		
-		//Collisions for if the monster tries to leave the map.
-		if(x<-World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = -World.WORLD_SIZE/2+(TheCalm.VIEW_H/2);
-		if((x+width)>World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = World.WORLD_SIZE/2-width+(TheCalm.VIEW_H/2);
-		if(y<-World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = -World.WORLD_SIZE/2+(TheCalm.VIEW_V/2);
-		if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
-		
-		
-		//Unstick stuck monsters
-		if(isStuck()&&collides){
-			x++;
+		if(!camping){
+			//Monster's old position
+			double oldx = x;
+			double oldy = y;
+			
+			//Move Horizontally
+			x += dx*v;
+			
+			//Horizontal collision
+			collisions(oldx, oldy);
+			
+			//Monster's old position
+			oldx = x;
+			oldy = y;
+			
+			/*Now we must repeat the process in the y-axis (this allows the preservation of motion in one component when moving diagonally)
+			Move Vertically */
+			y += dy*v;
+			
+			//Vertical collision
+			collisions(oldx, oldy);
+			
+			//Collisions for if the monster tries to leave the map.
+			if(x<-World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = -World.WORLD_SIZE/2+(TheCalm.VIEW_H/2);
+			if((x+width)>World.WORLD_SIZE/2+(TheCalm.VIEW_H/2)) x = World.WORLD_SIZE/2-width+(TheCalm.VIEW_H/2);
+			if(y<-World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = -World.WORLD_SIZE/2+(TheCalm.VIEW_V/2);
+			if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
+			
+			
+			//Unstick stuck monsters
+			if(isStuck()&&collides){
+				x++;
+			}
+			
+			//Set Bounds
+			setBounds((int)x,(int)y,width,height);
 		}
 		
-		//Set Bounds
-		setBounds((int)x,(int)y,width,height);
+		//Camp
+		if(camps){
+			if(Math.abs(x-player.x)<=aggroRad||Math.abs(y-player.y)<=aggroRad){
+				camping=true;
+			}else if(Math.abs(x-player.x)>=deAggroRad||Math.abs(y-player.y)>=deAggroRad){
+				camping = false;
+			}
+		}
+		
+		//Shoot
+		if((shoots&&canFire&&(!camps||camping))){
+			Projectile p = new Projectile((int)x+12,(int)y+12, player, viewport, gc, 2, Projectile.FIREBALL);
+			projectiles.add(p);
+			canFire = false;
+			Timer fireRateTimer = new Timer();
+			TimerTask fireRateTask = new FireRateControl();
+			fireRateTimer.schedule(fireRateTask, fireRateDelay);
+		}
 	}
 	
 	//Respond to being hit with melee (knockback, flash red)

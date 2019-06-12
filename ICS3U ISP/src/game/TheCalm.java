@@ -137,6 +137,8 @@ public class TheCalm {
 		//Monster pathfinding + movement
 		for(Monster m : monsters) {
 			m.move();
+			m.projectiles.removeAll(m.x_projectiles);
+			m.x_projectiles = new ArrayList<Projectile>();
 		}
 		
 		//Bullet Movement
@@ -179,6 +181,23 @@ public class TheCalm {
 				pickups.add(p);
 				x_monsters.add(m);
 			}
+			
+			//Monster projectiles
+			if(m.shoots){
+				for(Projectile p: m.projectiles){
+					p.move();
+					//Allow player to block shots with sword
+					if(player.swinging && p.intersectsLine(player.x, player.y, player.bpx,player.bpy)){
+						m.x_projectiles.add(p);
+					}else if(p.intersects(player)){
+						player.hurt(p);
+						m.x_projectiles.add(p);
+					}
+					if(p.deleteMe){
+						m.x_projectiles.add(p);
+					}
+				}
+			}
 		}
 		
 		//Pickups
@@ -214,6 +233,11 @@ public class TheCalm {
 		//Draw Monsters
 		for(Monster m : monsters) {
 			m.draw();		
+			if(m.shoots){
+				for(Projectile p: m.projectiles){
+					p.draw();
+				}
+			}
 		}
 	}
 	
@@ -239,7 +263,7 @@ public class TheCalm {
 			if(monsters.size()<100){
 				int x  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
 				int y  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
-				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*2));
+				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*3));
 				monsters.add(m);
 			}
 		}

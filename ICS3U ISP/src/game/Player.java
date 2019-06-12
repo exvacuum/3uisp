@@ -15,7 +15,7 @@ class Player extends Rectangle{
 	double x,y;
 	
 	//Health
-	double hp = 100, mhp = 100;
+	double hp = 20, mhp = 20;
 	
 	//Velocity, acceleration, stamina, ammo, reload speed, body heat
 	double vx = 0, vy = 0, mv = 2.0, a = 0.08, dvx = 1, dvy = 1, stam = 100, mstam = 100, ammo = 10, mammo = 10, reloadSpeed = 0.1, heat = 0, mheat = 100;
@@ -237,12 +237,9 @@ class Player extends Rectangle{
 				
 
 				//HP regen
-				//Regenerate stamina
 				if(hp<mhp){
-					hp+=0.005;
+					hp+=0.001;
 				}else{
-					
-					//catch stamina when it reaches its max
 					hp = mhp;
 				}
 				
@@ -484,7 +481,7 @@ class Player extends Rectangle{
 		}	
 	}
 	
-	//Respond to being hit by bullet (knockback, flash red)
+	//Respond to being hit by Monster (knockback, flash red)
 	void hurt(Monster m){
 		if(!invincible) {
 			
@@ -519,4 +516,40 @@ class Player extends Rectangle{
 			}
 		}
 	}
+	
+	//Respond to being hit by projectile (knockback, flash red)
+		void hurt(Projectile p){
+			if(!invincible) {
+				
+				//Player's old position
+				double oldx = x;
+				double oldy = y;
+				
+				//Horizontal Knockback
+				vx+=p.dx;
+				
+				//Horizontal Collision
+				collisions(oldx, oldy);
+				
+				//Monster's old position
+				oldx = x;
+				oldy = y;
+						
+				//Vertical Knockback
+				vy+=p.dy;
+						
+				//Vertical Collision
+				collisions(oldx, oldy);
+				
+				hp-=5;
+				invincible = true;
+				color = new Color(100,0,0);
+				Timer hitTimer = new Timer();
+				TimerTask hitTask = new HitControl();
+				hitTimer.schedule(hitTask, 1000);
+				if(hp<=0){
+					dead = true;
+				}
+			}
+		}
 }
