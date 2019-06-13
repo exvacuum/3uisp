@@ -398,6 +398,16 @@ class Player extends Rectangle{
 		gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);
 		
 		setBounds((int)x,(int)y,width,height);
+		
+		//Healing
+		if(keyDown('H')&&inventory[INV_SOUL]>0&&hp<mhp){
+			inventory[INV_SOUL]--;
+			if(hp<mhp-1){
+				hp++;
+			}else{
+				hp = mhp;
+			}
+		}
 	}
 	
 	//Draw player
@@ -478,6 +488,15 @@ class Player extends Rectangle{
 	
 	boolean keyDown(int key){
 		return gc.isKeyDown(key);
+	}
+	
+	//Checking for key press, code or char
+	boolean keyPressed(int key){
+		return gc.getLastKeyCode()==key;
+	}
+	
+	boolean keyPressed(char key){
+		return gc.getLastKeyChar()==key;
 	}
 	
 	//Get if mouse was clicked this step

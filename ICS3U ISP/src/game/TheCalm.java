@@ -3,7 +3,6 @@ package game;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import hsa2x.GraphicsConsole;
 
@@ -43,29 +42,18 @@ public class TheCalm {
 	ArrayList<Bullet> x_bullets = new ArrayList<Bullet>();
 	ArrayList<Pickup> x_pickups = new ArrayList<Pickup>();
 	
-	//Timers for game events
-	Timer monsterSpawnTimer = new Timer();
-	TimerTask monsterSpawnTask = new monsterSpawn();
-	Timer monsterNumTimer = new Timer();
-	TimerTask monsterNumTask = new monsterNumber();
-	
-	//Variables to decide whether to spawn monsters in a given step, and to control the number spawned
-	boolean willSpawnMonsters = false;
-	int monsterNum = 10;
-	
-	//Enable monster spawning
-	private class monsterSpawn  extends TimerTask{
-		public void run(){
-			willSpawnMonsters = true;
-		}
-	}
-	
-	//Increment the number of monsters spawned during a spawn event
-	private class monsterNumber  extends TimerTask{
-		public void run(){
-			monsterNum++;
-		}
-	}
+	//Monster Control Variables
+	Timer monsterSpawnTimer;
+	Timer waveTimer;
+	int monsterNum = 9;
+	int monstersLeft;
+	int wave = 1;
+	int waveTime;
+	long timeLeft = waveTime;
+	double completion = 0.0;
+	boolean limitTime = true;
+	boolean waveInProgress = false;
+	long initialTime;
 	
 	//MAIN
 	public static void main(String[] args) {
@@ -80,9 +68,6 @@ public class TheCalm {
 		
 		//Game loop
 		while(true){
-		
-			//Spawn Monsters if needed
-			if(willSpawnMonsters) spawnMonsters();
 			
 			//Clean up the garbage
 			monsters.removeAll(x_monsters);
@@ -124,11 +109,31 @@ public class TheCalm {
 		gc.setLocationRelativeTo(null);
 		
 		//Monsters
-		monsterSpawnTimer.schedule(monsterSpawnTask, 0, 5000);
-		monsterNumTimer.schedule(monsterNumTask, 5000, 10000);
+		
+		//Timer for wave 1
+		if(limitTime){
+			waveTime = (int)(100*Math.log10(wave)+30)*1000;
+			timeLeft = waveTime;
+			initialTime = System.currentTimeMillis();
+		}
 	}
 	
 	void step(){
+		
+		//Wave Control
+		if(waveInProgress&&monsters.size()<monsterNum){
+			waveInProgress = false;
+			endWave();
+		}
+		
+		//Countdown
+		if(!waveInProgress&&limitTime){
+			timeLeft = waveTime-(System.currentTimeMillis()-initialTime);
+			if(timeLeft <= 0){
+				waveInProgress = true;
+				nextWave();
+			}
+		}
 		
 		//Reset Trash Lists
 		x_monsters = new ArrayList<Monster>();
@@ -250,6 +255,10 @@ public class TheCalm {
 		
 		//Player GUI
 		player.drawGUI();
+		
+		//Other GUI (Wave Info Etc)
+		gc.setColor(Color.BLACK);
+		gc.drawString("Wave: " + wave + (waveInProgress ? "" : (limitTime ? "   Time until next wave: " + String.format("%.2f", timeLeft/1000.0) : "" )),310,15);
 	}
 	
 	//Get the current viewport
@@ -261,12 +270,30 @@ public class TheCalm {
 	void spawnMonsters(){
 		for(int i = 0; i < monsterNum; i++) {
 			if(monsters.size()<100){
-				int x  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
-				int y  = (int)((Math.random()*World.WORLD_SIZE-32)+1);
+				int x  = (int)((Math.random()*World.WORLD_SIZE/2-32)+World.WORLD_SIZE/2);
+				int y  = (int)((Math.random()*World.WORLD_SIZE/2-32)+1);
 				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*3));
 				monsters.add(m);
 			}
+			monstersLeft = monsters.size();
 		}
-		willSpawnMonsters = false;
+	}
+	
+	//End of wave
+	void endWave(){
+		waveInProgress = false;
+		monsterNum++;
+		wave++;
+		if(limitTime){
+			waveTime = (int)(100*Math.log10(wave)+30)*1000;
+			timeLeft = waveTime;
+			initialTime = System.currentTimeMillis();
+		}
+	}
+	
+	//Wave Control
+	void nextWave(){
+		//Timers for game events
+		spawnMonsters();
 	}
 }
