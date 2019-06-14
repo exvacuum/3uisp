@@ -8,9 +8,9 @@ import hsa2x.GraphicsConsole;
 public class World {
 	
 	//Game size constants
-	static final int WORLD_SIZE = 16000;
+	static final int WORLD_SIZE = 6400;
 	static final int GRID_SIZE = 32;
-	static final int GRID_NUM = 500;
+	static final int GRID_NUM = 200;
 	
 	//Tile type constants
 	static final int TILE_GRASSY = -1;

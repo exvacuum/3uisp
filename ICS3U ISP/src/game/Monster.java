@@ -16,6 +16,9 @@ class Monster extends Rectangle{
 	static final int GHOUL = 0;
 	static final int GOBLIN = 1;
 	static final int FIRE_ELEMENTAL = 2;
+	static final int BOSS = 3;
+	
+	int type;
 	
 	//Point to move towards
 	Point target;
@@ -102,6 +105,7 @@ class Monster extends Rectangle{
 		this.gc = gc;
 		this.viewport = viewport;
 		this.world = player.world;
+		this.type = type;
 		
 		//Size
 		width = 32;
@@ -116,7 +120,7 @@ class Monster extends Rectangle{
 		reaquireTimer.schedule(reaquireTask, 100, 100);
 	    
 	    //Specialize the monster
-	    switch(type){
+	    switch(this.type){
 	    case GHOUL:
 	    	hp = 2;
 	    	v = 1.5;
@@ -128,11 +132,11 @@ class Monster extends Rectangle{
 	    	break;
 	    case GOBLIN:
 	    	hp = 5;
-	    	v = 1;
+	    	v = 0.5;
 	    	mhp = hp;
-	    	dColor = new Color(0,100,0);
+	    	dColor = new Color(0,100,0,200);
 	    	color = dColor;
-	    	collides = true;
+	    	collides = false;
 	    	camps = false;
 	    	break;
 	    case FIRE_ELEMENTAL:
@@ -147,6 +151,20 @@ class Monster extends Rectangle{
 	    	aggroRad = 150;
 	    	deAggroRad = 200;
 	    	fireRateDelay = 3000;
+	    	break;
+		case BOSS:
+	    	hp = 2;
+	    	v = 1;
+	    	mhp = hp;
+	    	dColor = new Color(200,0,0,200);
+	    	color = dColor;
+	    	collides = false;
+	    	camps = false;
+	    	shoots = true;
+	    	fireRateDelay = 1000;
+	    	width = 100;
+	    	height = 100;
+	    	break;
 	    }
 	}
 	
@@ -222,7 +240,7 @@ class Monster extends Rectangle{
 		
 		//Shoot
 		if((shoots&&canFire&&(!camps||camping))){
-			Projectile p = new Projectile((int)x+12,(int)y+12, player, viewport, gc, 2, Projectile.FIREBALL);
+			Projectile p = new Projectile((int)x+width/2-4,(int)y+width/2-4, player, viewport, gc, 2, (type==BOSS ? Projectile.BALL_OF_HATE : Projectile.FIREBALL));
 			projectiles.add(p);
 			canFire = false;
 			Timer fireRateTimer = new Timer();

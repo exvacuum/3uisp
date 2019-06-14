@@ -616,7 +616,8 @@ class Player extends Rectangle{
 				//Vertical Collision
 				collisions(oldx, oldy);
 				
-				hp-=5;
+				hp-=(p.type==Projectile.BALL_OF_HATE ? 10 : 5);
+				
 				invincible = true;
 				color = new Color(100,0,0);
 				Timer hitTimer = new Timer();

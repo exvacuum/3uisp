@@ -25,6 +25,7 @@ public class Projectile extends Rectangle{
 
 	//Projectile Types
 	static final int FIREBALL = 0;
+	static final int BALL_OF_HATE = 1;
 	
 	int type;
 	
@@ -52,6 +53,20 @@ public class Projectile extends Rectangle{
 		this.type = type;
 		this.v = v;
 		
+		//Type
+		switch(type){
+		case FIREBALL:
+			color = new Color(200,100,0,200);
+			width = 8;
+			height = 8;
+			break;
+		case BALL_OF_HATE:
+			color = new Color(0,0,0,200);
+			width = 16;
+			height = 16;
+			break;
+		}
+		
 		//Inaccuracy / Spread
 	    Random random = new Random();
 	    double rand = Math.random()/15 * (random .nextBoolean() ? -1 : 1);
@@ -66,29 +81,23 @@ public class Projectile extends Rectangle{
 	    //x and y components with set magnitudes so that distance from player to mouse is irrelevant, with spread added
 	    dx = v*Math.cos(dir+rand);
 	    dy = v*Math.sin(dir+rand);
-	    
-	    //Bullet size
-		width = 8;
-		height = 8;
 		
 		//Life Timer
 		Timer decomposeTimer = new Timer();
 		TimerTask decomposeTask = new DecomposeControl();
 		decomposeTimer.schedule(decomposeTask, 5000);
 		
-		//Type
-		switch(type){
-		case FIREBALL:
-			color = new Color(200,100,0,200);
-			break;
-		}
 	}
 	
 	void draw(){
 		
 		//Draw Bullet, account for offset caused by viewport
 		gc.setColor(color);
-		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
+		if(type != BALL_OF_HATE) {
+			gc.fillRect((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
+		}else{
+			gc.fillOval((int)(x-viewport.getxOffset()), (int)(y-viewport.getyOffset()), width, height);
+		}
 	}
 	
 	void move(){

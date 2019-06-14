@@ -45,8 +45,7 @@ public class TheCalm {
 	//Monster Control Variables
 	Timer monsterSpawnTimer;
 	Timer waveTimer;
-	int monsterNum = 9;
-	int monstersLeft;
+	int monsterNum = 20;
 	int wave = 1;
 	int waveTime;
 	long timeLeft = waveTime;
@@ -121,7 +120,7 @@ public class TheCalm {
 	void step(){
 		
 		//Wave Control
-		if(waveInProgress&&monsters.size()<monsterNum){
+		if(waveInProgress&&monsters.size()==0){
 			waveInProgress = false;
 			endWave();
 		}
@@ -258,7 +257,7 @@ public class TheCalm {
 		
 		//Other GUI (Wave Info Etc)
 		gc.setColor(Color.BLACK);
-		gc.drawString("Wave: " + wave + (waveInProgress ? "" : (limitTime ? "   Time until next wave: " + String.format("%.2f", timeLeft/1000.0) : "" )),310,15);
+		gc.drawString("Wave: " + wave + (waveInProgress ? "   Monsters Left: " + monsters.size() : (limitTime ? "   Starting: " + String.format("%.2f", timeLeft/1000.0) : "" )),310,15);
 	}
 	
 	//Get the current viewport
@@ -269,23 +268,28 @@ public class TheCalm {
 	//Spawn monsterNum number of monsters, and then disable monster spawning until timer enables it again
 	void spawnMonsters(){
 		for(int i = 0; i < monsterNum; i++) {
-			if(monsters.size()<100){
-				int x  = (int)((Math.random()*World.WORLD_SIZE/2-32)+World.WORLD_SIZE/2);
-				int y  = (int)((Math.random()*World.WORLD_SIZE/2-32)+1);
-				Monster m = new Monster(x, y, player, viewport, gc, (int)(Math.random()*3));
-				monsters.add(m);
-			}
-			monstersLeft = monsters.size();
+			int x  = (int)((Math.random()*World.WORLD_SIZE/2-32)+World.WORLD_SIZE/2);
+			int y  = (int)((Math.random()*World.WORLD_SIZE/2-32)+1);
+			double rand = Math.random();
+			Monster m = new Monster(x, y, player, viewport, gc, (rand< 0.4 ? Monster.GHOUL: (rand > 0.4 && rand < 0.75 ? Monster.GOBLIN : Monster.FIRE_ELEMENTAL)));
+			monsters.add(m);
 		}
+		if(wave%5==0){
+			Monster b = new Monster(-World.WORLD_SIZE/2,World.WORLD_SIZE/2,player,viewport,gc,Monster.BOSS);
+			b.hp = 50*wave/5;
+			b.mhp = b.hp;
+			monsters.add(b);
+		}
+		
 	}
 	
 	//End of wave
 	void endWave(){
 		waveInProgress = false;
-		monsterNum++;
+		monsterNum+=(int)(100*Math.log10(wave)+30);
 		wave++;
 		if(limitTime){
-			waveTime = (int)(100*Math.log10(wave)+30)*1000;
+			waveTime = (int)(50*Math.log10(wave)+30)*500;
 			timeLeft = waveTime;
 			initialTime = System.currentTimeMillis();
 		}
