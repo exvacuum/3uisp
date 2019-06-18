@@ -12,6 +12,7 @@ public class Pickup extends Rectangle{
 	static final int PU_SOUL = 0;
 	static final int PU_WOOD = 1;
 	static final int PU_STONE = 2;
+	static final int PU_FIRE = 3;
 	
 	//GraphicsConsole
 	GraphicsConsole gc;
@@ -45,10 +46,13 @@ public class Pickup extends Rectangle{
 			color = Color.MAGENTA;
 			break;
 		case PU_WOOD:
-			color = Color.ORANGE.darker();
+			color = Color.ORANGE.darker().darker().darker();
 			break;
 		case PU_STONE:
-			color = Color.GRAY;
+			color = Color.DARK_GRAY;
+			break;
+		case PU_FIRE:
+			color = TheCalm.COL_FIRE;
 			break;
 		}
 		

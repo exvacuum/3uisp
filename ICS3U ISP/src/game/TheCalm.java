@@ -66,6 +66,7 @@ public class TheCalm {
 	//Colors
 	static final Color COL_TRANS_BLACK = new Color(0,0,0,100);
 	static final Color COL_CLEAR = new Color(0,0,0,0);
+	static final Color COL_FIRE = new Color(200,100,0);
 	
 	//MAIN
 	public static void main(String[] args) {
@@ -289,8 +290,7 @@ public class TheCalm {
 			
 			//Monster death
 			if(m.hp<=0){
-				Pickup p = new Pickup(m.x+8,m.y+8,gc,getViewport(),player,Pickup.PU_SOUL);
-				pickups.add(p);
+				m.die();
 				x_monsters.add(m);
 			}
 			
@@ -382,11 +382,11 @@ public class TheCalm {
 			int x  = (int)((Math.random()*World.WORLD_SIZE/2-32)+World.WORLD_SIZE/2);
 			int y  = (int)((Math.random()*World.WORLD_SIZE/2-32)+1);
 			double rand = Math.random();
-			Monster m = new Monster(x, y, player, viewport, gc, (rand< 0.4 ? Monster.GHOUL: (rand > 0.4 && rand < 0.75 ? Monster.GOBLIN : Monster.FIRE_ELEMENTAL)));
+			Monster m = new Monster(x, y, player, viewport, gc, this, (rand< 0.4 ? Monster.GHOUL: (rand > 0.4 && rand < 0.75 ? Monster.GOBLIN : Monster.FIRE_ELEMENTAL)));
 			monsters.add(m);
 		}
 		if(wave%5==0){
-			Monster b = new Monster(-World.WORLD_SIZE/2,World.WORLD_SIZE/2,player,viewport,gc,Monster.BOSS);
+			Monster b = new Monster(-World.WORLD_SIZE/2,World.WORLD_SIZE/2,player,viewport,gc, this,Monster.BOSS);
 			b.hp = 50*wave/5;
 			b.mhp = b.hp;
 			monsters.add(b);

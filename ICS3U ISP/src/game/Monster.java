@@ -35,6 +35,9 @@ class Monster extends Rectangle{
 	//Window
 	GraphicsConsole gc;
 	
+	//Game
+	TheCalm game;
+	
 	//Position, direction, velocity, and health
 	double x, y, dx, dy, dir, v, hp, mhp;
 	
@@ -98,7 +101,7 @@ class Monster extends Rectangle{
 	    } 
 	} 
 
-	Monster(int x, int y, Player player, Viewport viewport, GraphicsConsole gc, int type){
+	Monster(int x, int y, Player player, Viewport viewport, GraphicsConsole gc, TheCalm game, int type){
 		this.x = x;
 		this.y = y;
 		this.player = player;
@@ -106,6 +109,7 @@ class Monster extends Rectangle{
 		this.viewport = viewport;
 		this.world = player.world;
 		this.type = type;
+		this.game = game;
 		
 		//Size
 		width = 32;
@@ -218,12 +222,6 @@ class Monster extends Rectangle{
 			if(y<-World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = -World.WORLD_SIZE/2+(TheCalm.VIEW_V/2);
 			if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
 			
-			
-			//Unstick stuck monsters
-			if(isStuck()&&collides){
-				x++;
-			}
-			
 			//Set Bounds
 			setBounds((int)x,(int)y,width,height);
 		}
@@ -292,6 +290,30 @@ class Monster extends Rectangle{
 			hitTimer.schedule(hitTask, 200);
 	}
 	
+	//Die
+	void die(){
+		switch(type){
+		case FIRE_ELEMENTAL:
+			if(Math.random()>0.5){
+				Pickup p = new Pickup(x,y,gc,game.getViewport(),player,Pickup.PU_FIRE);
+				game.pickups.add(p);
+			}
+			break;
+		case GOBLIN:
+			double rand = Math.random();
+			if(rand>0.5){
+				Pickup p = new Pickup(x,y,gc,game.getViewport(),player,Pickup.PU_WOOD);
+				game.pickups.add(p);
+			}
+			if(rand>0.7){
+				Pickup p = new Pickup(x-8,y-8,gc,game.getViewport(),player,Pickup.PU_STONE);
+				game.pickups.add(p);
+			}
+		}
+		Pickup p = new Pickup(getCenterX(),getCenterY(),gc,game.getViewport(),player,Pickup.PU_SOUL);
+		game.pickups.add(p);
+	}
+	
 	void collisions(double oldx, double oldy){
 		if(collides){
 			/*Collision Checking
@@ -327,40 +349,6 @@ class Monster extends Rectangle{
 				}
 			}
 		}	
-	}
-	
-	boolean isStuck(){
-		/*Collision Checking for Spawning
-		 * 
-		 *Basically, this retrieves the place each of the monster's sides
-		 *left tile and right tile return the columns either side of the monster is in
-		 *top tile and bottom tile return the rows on top and below the tile
-		 */
-		leftTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+1))/(double)World.GRID_SIZE);
-		rightTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width-1))/(double)World.GRID_SIZE);
-		topTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+1))/(double)World.GRID_SIZE);
-		bottomTile = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height-1))/(double)World.GRID_SIZE);
-		
-		//Limit this system to the size of the world
-		if(leftTile < 0) leftTile = 0;
-		if(rightTile > World.GRID_NUM-1) rightTile = World.GRID_NUM-1;
-		if(topTile < 0) topTile = 0;
-		if(bottomTile > World.GRID_NUM-1) bottomTile = World.GRID_NUM-1;
-		
-		//Get the 4 grid spaces surrounding the monster.
-		for(int i=leftTile; i<=rightTile; i++)
-		{
-			for(int j=topTile; j<=bottomTile; j++)
-			{
-				
-				//If monster is inside a solid
-				if(world.tileDecor[j][i]!=World.DECO_NONE){
-					
-					return true;
-				}
-			}
-		}	
-		return false;
 	}
 	
 	void targetPlayer(){
