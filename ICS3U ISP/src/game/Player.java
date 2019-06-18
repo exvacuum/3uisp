@@ -11,6 +11,10 @@ import hsa2x.GraphicsConsole;
 @SuppressWarnings("serial")
 class Player extends Rectangle{
 	
+	//Keys Pressed
+	ArrayList<Integer> keysPressed = new ArrayList<Integer>();
+	ArrayList<Character> keyCharsPressed = new ArrayList<Character>();
+	
 	//Position
 	double x,y;
 	
@@ -23,14 +27,12 @@ class Player extends Rectangle{
 	//Direction, fire & swing rate, ammo, speed multiplier
 	int dx = 0, dy = 0, fireRateDelay = 200, swingDelay = 500, vMulti = 1;		
 	
-	//Inventory
-	int[] inventory = new int[3];
-	static final int INV_SOUL = Pickup.PU_SOUL;
-	static final int INV_WOOD = Pickup.PU_WOOD;
-	static final int INV_STONE = Pickup.PU_STONE;
 	
 	//Graphics Console
 	GraphicsConsole gc;
+	
+	//Inventory
+	Inventory inventory;
 	
 	//Bullets List
 	ArrayList<Bullet> bullets = new ArrayList<Bullet>();
@@ -95,6 +97,7 @@ class Player extends Rectangle{
 		this.world = world;
 		this.gc = gc;
 		this.viewport = viewport;
+		inventory = new Inventory(gc);
 		
 		//Put player in the center of the screen
 		x = gc.getDrawWidth()/2-16;
@@ -162,7 +165,7 @@ class Player extends Rectangle{
 				}
 				
 				//Fire Bullets from the center of the player, accounting for delay caused by fire rate
-				if(ammo>0&&!reloading&&!keyDown('R')){
+				if(ammo>0&&!reloading&&!keyDown('R')&&!inventory.active){
 					if((mouseButtonDown(0)&&canFire&&!keyDown(GraphicsConsole.VK_CONTROL))){
 							Bullet b = new Bullet((int)x+12,(int)y+12, this, viewport, gc);
 							bullets.add(b);
@@ -214,11 +217,15 @@ class Player extends Rectangle{
 							break;
 						case World.DECO_STONE:
 							world.tileDecor[dgy][dgx]=World.DECO_NONE;
-							inventory[INV_STONE]++;
+							if(inventory.amounts[Inventory.MAT_STONE]<999){
+								inventory.add(Inventory.MAT_STONE);
+							}
 							break;
 						case World.DECO_TREE:
 							world.tileDecor[dgy][dgx]=World.DECO_NONE;
-							inventory[INV_WOOD]++;
+							if(inventory.amounts[Inventory.MAT_WOOD]<999){
+								inventory.add(Inventory.MAT_WOOD);
+							}
 							break;
 						}
 					}else{
@@ -394,19 +401,23 @@ class Player extends Rectangle{
 		if((y+height)>World.WORLD_SIZE/2+(TheCalm.VIEW_V/2)) y = World.WORLD_SIZE/2-height+(TheCalm.VIEW_V/2);
 		
 		//Get grid position
-		gx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width/2))/(double)World.GRID_SIZE);
-		gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);
+		updateGridPos();
 		
 		setBounds((int)x,(int)y,width,height);
 		
 		//Healing
-		if(keyDown('H')&&inventory[INV_SOUL]>0&&hp<mhp){
-			inventory[INV_SOUL]--;
+		if(keyPressed('H')&&inventory.amounts[Inventory.MAT_SOUL]>0&&hp<mhp){
+			inventory.remove(Inventory.MAT_SOUL);
 			if(hp<mhp-1){
 				hp++;
 			}else{
 				hp = mhp;
 			}
+		}
+		
+		//Inventory/Pause Screen
+		if(keyPressed(GraphicsConsole.VK_ESCAPE)){
+			inventory.active = !inventory.active;
 		}
 	}
 	
@@ -454,26 +465,6 @@ class Player extends Rectangle{
 		gc.fillRect(35, 45, gc.getDrawWidth()/4,10);
 		gc.setColor(Color.BLUE.brighter());
 		gc.fillRect(35, 45, (int)((ammo/mammo)*(gc.getDrawWidth()/4)),10);
-		
-		//Inventory
-		
-		//Souls
-		gc.setColor(Color.MAGENTA);
-		gc.fillOval(10, 65, 12, 12);
-		gc.setColor(Color.BLACK);
-		gc.drawString(""+inventory[INV_SOUL],25,75);
-		
-		//Wood
-		gc.setColor(Color.ORANGE.darker().darker().darker().darker());
-		gc.fillOval(10, 85, 12, 12);
-		gc.setColor(Color.BLACK);
-		gc.drawString(""+inventory[INV_WOOD],25,95);
-		
-		//Stone
-		gc.setColor(Color.DARK_GRAY);
-		gc.fillOval(10, 105, 12, 12);
-		gc.setColor(Color.BLACK);
-		gc.drawString(""+inventory[INV_STONE],25, 115);
 	}
 	
 	//Getter for bullet arraylist
@@ -492,11 +483,23 @@ class Player extends Rectangle{
 	
 	//Checking for key press, code or char
 	boolean keyPressed(int key){
-		return gc.getLastKeyCode()==key;
+		if(gc.isKeyDown(key)&&!keysPressed.contains(key)){
+			keysPressed.add(key);
+			return true;
+		}else{
+			if(!gc.isKeyDown(key)&&keysPressed.contains(key)) keysPressed.remove(keysPressed.indexOf(key));
+			return false;
+		}
 	}
 	
 	boolean keyPressed(char key){
-		return gc.getLastKeyChar()==key;
+		if(gc.isKeyDown(key)&&!keyCharsPressed.contains(key)){
+			keyCharsPressed.add(key);
+			return true;
+		}else{
+			if(!gc.isKeyDown(key)&&keyCharsPressed.contains(key)) keyCharsPressed.remove(keyCharsPressed.indexOf(key));
+			return false;
+		}
 	}
 	
 	//Get if mouse was clicked this step
@@ -627,5 +630,10 @@ class Player extends Rectangle{
 					dead = true;
 				}
 			}
+		}
+		
+		void updateGridPos(){
+			gx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width/2))/(double)World.GRID_SIZE);
+			gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);
 		}
 }

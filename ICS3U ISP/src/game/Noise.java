@@ -16,7 +16,6 @@ public final class Noise {
    /** 
    Initialization seed used to start the random number generator.
    */
-   public static int seed = (int)(System.currentTimeMillis());
 
    private static final int P = 8;
    private static final int B = 1 << P;
@@ -32,7 +31,7 @@ public final class Noise {
    private static int start = 1;
    private static double[][] points = new double[32][3];
 
-   static {
+   Noise(){
       init();
    }
 
@@ -201,7 +200,7 @@ public final class Noise {
    private static void init() {
       int i, j, k;
       double u, v, w, U, V, W, Hi, Lo;
-      java.util.Random r = new java.util.Random(seed);
+      java.util.Random r = new java.util.Random((System.currentTimeMillis()));
       for (i = 0; i < B; i++) {
          p[i] = i;
          g1[i] = 2 * r.nextDouble() - 1;

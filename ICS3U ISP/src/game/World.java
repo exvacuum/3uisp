@@ -37,7 +37,6 @@ public class World {
 	//Viewport
 	Viewport viewport;
 	
-	
 	//Constructor, initiates world generation
 	World(int x, int y, Viewport viewport, GraphicsConsole gc){
 		this.viewport = viewport;

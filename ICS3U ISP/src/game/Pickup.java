@@ -42,7 +42,7 @@ public class Pickup extends Rectangle{
 		
 		switch(type){
 		case PU_SOUL:
-			color = new Color(255,0,255,200);
+			color = Color.MAGENTA;
 			break;
 		case PU_WOOD:
 			color = Color.ORANGE.darker();
@@ -64,7 +64,9 @@ public class Pickup extends Rectangle{
 	
 	//Give to player
 	void givePlayer(){
-		player.inventory[type]++;
+		if(player.inventory.amounts[type]<999){
+			player.inventory.add(type);
+		}
 	}
 	
 }
