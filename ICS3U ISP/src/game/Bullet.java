@@ -17,7 +17,7 @@ class Bullet extends Rectangle{
 		Player player;
 		Viewport viewport;
 		
-		//Boolean to determine whether the bullet is waiting to die
+		//Boolean to determine whether the bullet is waiting to be deleted
 		boolean deleteMe = false;
 		
 		//When time is up, delete me

@@ -17,7 +17,6 @@ class Monster extends Rectangle{
 	static final int GOBLIN = 1;
 	static final int FIRE_ELEMENTAL = 2;
 	static final int BOSS = 3;
-	
 	int type;
 	
 	//Point to move towards
@@ -118,7 +117,7 @@ class Monster extends Rectangle{
 		//Target Player
 		targetPlayer();
 	    
-	    //Start reaquisition timer real quick
+	    //Start reaquisition timer
 	    Timer reaquireTimer = new Timer();
 		TimerTask reaquireTask = new ReaquireControl();
 		reaquireTimer.schedule(reaquireTask, 100, 100);
@@ -173,6 +172,7 @@ class Monster extends Rectangle{
 	}
 	
 	void draw(){
+		
 		//Draw the Monster if on screen
 		if((Math.abs(player.x-x)<700)&&(Math.abs(player.y-y)<500)){
 			gc.setColor(color);
@@ -181,6 +181,7 @@ class Monster extends Rectangle{
 	}
 	
 	void drawGUI(){
+		
 		//If the monster has been hurt, and is on screen, draw a healthbar
 		if((Math.abs(player.x-x)<700)&&(Math.abs(player.y-y)<500)){
 			if(hp!=mhp){
@@ -195,6 +196,7 @@ class Monster extends Rectangle{
 	//Move
 	void move(){
 		if(!camping){
+			
 			//Monster's old position
 			double oldx = x;
 			double oldy = y;
@@ -230,6 +232,7 @@ class Monster extends Rectangle{
 		if(camps){
 			if(Math.hypot(player.x-x,player.y-y)<=aggroRad){
 				camping=true;
+			
 			//If leaves deAggro radius, resume pursuit
 			}else if(Math.hypot(player.x-x,player.y-y)>=deAggroRad){
 				camping = false;
@@ -248,16 +251,16 @@ class Monster extends Rectangle{
 	}
 	
 	//Respond to being hit with melee (knockback, flash red)
-		void hurt(){
-			if(!invincible) {
-				invincible = true;
-				hp--;
-				color = new Color(100,0,0);
-				Timer hitTimer = new Timer();
-				TimerTask hitTask = new HitControl();
-				hitTimer.schedule(hitTask, 200);
-			}
+	void hurt(){
+		if(!invincible) {
+			invincible = true;
+			hp--;
+			color = new Color(100,0,0);
+			Timer hitTimer = new Timer();
+			TimerTask hitTask = new HitControl();
+			hitTimer.schedule(hitTask, 200);
 		}
+	}
 	
 	//Respond to being hit by bullet (knockback, flash red)
 	void hurt(Bullet b){
@@ -290,8 +293,9 @@ class Monster extends Rectangle{
 			hitTimer.schedule(hitTask, 200);
 	}
 	
-	//Die
 	void die(){
+		
+		//Die, and drop resources
 		switch(type){
 		case FIRE_ELEMENTAL:
 			if(Math.random()>0.5){
@@ -309,13 +313,24 @@ class Monster extends Rectangle{
 				Pickup p = new Pickup(x-8,y-8,gc,game.getViewport(),player,Pickup.PU_STONE);
 				game.pickups.add(p);
 			}
+			break;
+		case BOSS:
+			
+			//Drop large amount of souls
+			for(int i = 0; i < 49; i++){
+				Pickup p = new Pickup(getCenterX(),getCenterY(),gc,game.getViewport(),player,Pickup.PU_SOUL);
+				game.pickups.add(p);
+			}	
 		}
+		
+		//All monsters will drop at least one soul
 		Pickup p = new Pickup(getCenterX(),getCenterY(),gc,game.getViewport(),player,Pickup.PU_SOUL);
 		game.pickups.add(p);
 	}
 	
 	void collisions(double oldx, double oldy){
 		if(collides){
+			
 			/*Collision Checking
 			 * 
 			 *Basically, this retrieves the place each of the monster's sides

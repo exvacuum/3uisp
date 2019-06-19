@@ -8,7 +8,7 @@ import hsa2x.GraphicsConsole;
 @SuppressWarnings("serial")
 public class Pickup extends Rectangle{
 	
-	//Macros for pickup types
+	//Constants for pickup types
 	static final int PU_SOUL = 0;
 	static final int PU_WOOD = 1;
 	static final int PU_STONE = 2;

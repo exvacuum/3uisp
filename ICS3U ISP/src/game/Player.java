@@ -97,7 +97,7 @@ class Player extends Rectangle{
 		this.world = world;
 		this.gc = gc;
 		this.viewport = viewport;
-		inventory = new Inventory(gc);
+		inventory = new Inventory(gc, this);
 		
 		//Put player in the center of the screen
 		x = gc.getDrawWidth()/2-16;
@@ -135,6 +135,23 @@ class Player extends Rectangle{
 				if(keyDown('D')){
 					dx++;
 				}
+				
+				//Hotbar selection
+				if(keyPressed(GraphicsConsole.VK_LEFT)){
+					if(inventory.hotBarCol>0){
+						inventory.hotBarCol--;
+					}else{
+						inventory.hotBarCol = 9;
+					}
+				}
+				if(keyPressed(GraphicsConsole.VK_RIGHT)){
+					if(inventory.hotBarCol<9){
+						inventory.hotBarCol++;
+					}else{
+						inventory.hotBarCol = 0;
+					}
+				}
+				inventory.hotBarColVal = inventory.slots[0][inventory.hotBarCol];
 				
 				//Sprint if shift is pressed and moving
 				if(keyDown(GraphicsConsole.VK_SHIFT)&&stam>0&&(dx!=0||dy!=0)){
@@ -193,6 +210,7 @@ class Player extends Rectangle{
 				if(!overHeated){
 					if((mouseButtonDown(0)&&keyDown(GraphicsConsole.VK_CONTROL))){
 						
+						//Overheat quickly while drilling
 						heat += 3;
 						drilling = true;
 						
@@ -227,6 +245,12 @@ class Player extends Rectangle{
 								inventory.add(Inventory.MAT_WOOD);
 							}
 							break;
+						case World.DECO_SAWN_LOG:
+							world.tileDecor[dgy][dgx]=World.DECO_NONE;
+							if(inventory.amounts[Inventory.PROD_SAWN_LOG]<999){
+								inventory.add(Inventory.PROD_SAWN_LOG);
+							}
+							break;
 						}
 					}else{
 						drilling = false;
@@ -238,8 +262,38 @@ class Player extends Rectangle{
 					drilling = false;
 				}
 				
+				//Block placement
+				if(keyDown(GraphicsConsole.VK_CONTROL)&&mouseButtonClicked(2)){
+					if(inventory.hotBarColVal == Inventory.PROD_SAWN_LOG){
+						//Angle
+						angle = Math.atan2(x + 16 - (gc.getMouseX() + viewport.getxOffset()), y + 16 - (gc.getMouseY() + viewport.getyOffset()));
+					    
+					    //x and y components with set magnitudes so that distance from player to mouse is irrelevant
+					    bdx = 50*Math.sin(angle);
+					    bdy = 50*Math.cos(angle);
+						
+					    //Endpoint for placement
+					    bpx = (x+width/2-bdx);
+					    bpy = (y+height/2-bdy);
+					    
+					    //Target block
+					    dgx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(bpx))/(double)World.GRID_SIZE);
+						dgy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(bpy))/(double)World.GRID_SIZE);
+						
+						
+						//Actual placement
+						if(world.tileDecor[dgy][dgx]==World.DECO_NONE&&inventory.amounts[Inventory.PROD_SAWN_LOG]>0){
+							world.tileDecor[dgy][dgx] = World.DECO_SAWN_LOG;
+							inventory.remove(Inventory.PROD_SAWN_LOG);
+						}
+						
+					}
+				}
+				
 				//Melee attacks
 				if(!overHeated&&!keyDown(GraphicsConsole.VK_CONTROL)){
+					
+					//Disallow quickly tapping the RMB to conserve heat
 					if(mouseButtonClicked(2)){
 						heat+=10;
 					}
@@ -249,6 +303,8 @@ class Player extends Rectangle{
 						if(bv!=0||vx!=0||vy!=0){
 							heat += 0.75;
 						}else{
+							
+							//Heat slowly if completely motionless
 							heat += 0.3;
 						}
 						swinging =  true;
@@ -301,6 +357,7 @@ class Player extends Rectangle{
 				}
 			}
 		}
+		
 		//Horizontal velocity direction
 		dvx = getDirVX();
 		
@@ -423,18 +480,22 @@ class Player extends Rectangle{
 	
 	//Draw player
 	void draw(){
+		
+		//Sword
 		if(swinging){
 			gc.setStroke(10);
 			gc.setColor(Color.GRAY);
 			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()), (int)(bpy-viewport.getyOffset()));
 		}
 		
+		//Drill
 		if(drilling){
 			gc.setStroke(15);
 			gc.setColor(Color.DARK_GRAY);
 			gc.drawLine((int)(x-viewport.getxOffset()+16), (int)(y-viewport.getyOffset()+16), (int)(bpx-viewport.getxOffset()+(Math.random()*3*(Math.random()>0.5 ? 1:-1))), (int)(bpy-viewport.getyOffset()+(Math.random()*3*(Math.random()>0.5 ? 1:-1))));
 		}
 		
+		//Player
 		gc.setColor(dead ? Color.BLACK : color);
 		gc.fillRect((int)(x-viewport.getxOffset()), (int)(y -viewport.getyOffset()),width,height);
 	}
@@ -632,6 +693,7 @@ class Player extends Rectangle{
 			}
 		}
 		
+		//Get player's grid coordinates
 		void updateGridPos(){
 			gx = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_H/2)+(x+width/2))/(double)World.GRID_SIZE);
 			gy = (int)((World.WORLD_SIZE/2-(TheCalm.VIEW_V/2)+(y+height/2))/(double)World.GRID_SIZE);

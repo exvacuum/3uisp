@@ -21,6 +21,7 @@ public class World {
 	static final int DECO_NONE = 0;
 	static final int DECO_STONE = 1;
 	static final int DECO_TREE = 2;
+	static final int DECO_SAWN_LOG = 3;
 	
 	//Positioning of world relative to console
 	int x;
@@ -138,6 +139,9 @@ public class World {
 						break;
 					case DECO_STONE:
 						gc.setColor(new Color(Color.HSBtoRGB(0/360f, 0f, 0.3f*((float)(tileVals[row][col])/6)+0.2f)));
+						break;
+					case DECO_SAWN_LOG:
+						gc.setColor(Color.ORANGE.darker());
 						break;
 					default:
 						drawThis = false;

@@ -11,7 +11,7 @@ import hsa2x.GraphicsConsole;
 @SuppressWarnings("serial")
 public class Projectile extends Rectangle{
 	
-	//Boolean to determine whether the bullet is waiting to die
+	//Boolean to determine whether to remove this
 	boolean deleteMe = false;
 	
 	//When time is up, delete me
