@@ -5,7 +5,7 @@ Trello to see current progress: https://trello.com/b/OildaD2A/ics3u-isp
 
 # NOTE: 
 
-HEAT'S ON! BEHIND SCHEDULE NOW BUT HOPING TO BE DONE BY JUNE 18
+Finally completed! At least for the most part. The game is now fully playable!
 
 # ICS3U ISP ACTION PLAN
 
